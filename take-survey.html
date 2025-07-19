@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Take Survey</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body class="bg-gray-50">
+  <!-- Sticky Navigation -->
+  <nav class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 flex items-center justify-between h-16">
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="flex items-center gap-3">
+          <svg width="32" height="32" fill="none" viewBox="0 0 48 48">
+            <rect x="4" y="8" width="40" height="32" rx="8" fill="#38bdf8"/>
+            <rect x="12" y="16" width="24" height="16" rx="4" fill="#34d399"/>
+          </svg>
+          <span class="font-semibold text-lg tracking-tight text-slate-800">SmartSurvey</span>
+        </a>
+      </div>
+      <div class="hidden md:flex gap-8 text-sm font-medium">
+        <div class="relative group">
+          <button id="featuresBtn" type="button" class="text-gray-600 hover:text-blue-600 transition font-medium flex items-center gap-1 focus:outline-none">
+            Features
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div id="featuresDropdown" class="absolute left-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-30 flex">
+            <div class="flex flex-col w-full">
+              <a href="survey-creation.html" class="block px-5 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">Survey Creation</a>
+              <a href="distribution.html" class="block px-5 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">Distribution & Sharing</a>
+              <a href="survey-analytics.html" class="block px-5 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">Response Collection</a>
+            </div>
+          </div>
+        </div>
+        <a href="index.html#how" class="hover:text-sky-500 transition-colors">How it Works</a>
+        <a href="view-survey.html" class="hover:text-sky-500 transition-colors">View Surveys</a>
+        <a href="survey-analytics.html" class="hover:text-sky-500 transition-colors">Response Collection</a>
+        <a href="index.html#contact" class="hover:text-sky-500 transition-colors">Contact</a>
+      </div>
+      <div class="flex gap-2">
+        <a href="login.html" id="login-button" class="rounded-lg px-4 py-2 font-medium hover:bg-sky-50 text-sky-600 transition-colors">Login</a>
+        <a href="login.html" id="signup-button" class="rounded-lg px-4 py-2 font-medium bg-sky-500 text-white shadow hover:bg-sky-600 transition-colors">Sign Up</a>
+        <button id="logout-button" class="rounded-lg px-4 py-2 font-medium bg-red-500 text-white shadow hover:bg-red-600 transition-colors" style="display:none;">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div id="surveyContainer" class="bg-white shadow rounded-lg p-6">
+      <div class="text-center py-12" id="loadingMessage">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+        <p class="mt-4 text-gray-600">Loading survey...</p>
+      </div>
+      
+      <div id="surveyContent" class="hidden">
+        <div id="thankYouMessage" class="hidden text-center py-12">
+          <svg class="mx-auto h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          <h2 class="mt-4 text-2xl font-semibold text-gray-900">Thank You!</h2>
+          <p class="mt-2 text-gray-600">Your response has been recorded.</p>
+          <div class="mt-6">
+            <a href="view-survey.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              Back to Surveys
+            </a>
+          </div>
+        </div>
+        
+        <form id="surveyForm">
+          <div id="surveyHeader" class="mb-8">
+            <h1 id="surveyTitle" class="text-2xl font-bold text-gray-900 mb-2"></h1>
+            <p id="surveyDescription" class="text-gray-600"></p>
+          </div>
+          
+          <div id="questionsContainer" class="space-y-8">
+            <!-- Questions will be inserted here -->
+          </div>
+          
+          <div class="mt-8 pt-6 border-t border-gray-200">
+            <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              Submit Response
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      let surveyId = urlParams.get('surveyId');
+      
+      // For backward compatibility, also check for 'id' parameter
+      if (!surveyId) {
+        surveyId = urlParams.get('id');
+      }
+      
+      if (!surveyId) {
+        showError('No survey ID provided');
+        return;
+      }
+      
+      console.log('Loading survey with ID:', surveyId);
+      
+      // Get the survey from localStorage
+      const surveys = JSON.parse(localStorage.getItem('surveys') || '[]');
+      const survey = surveys.find(s => s.id === surveyId);
+      
+      if (!survey) {
+        showError('Survey not found');
+        return;
+      }
+      
+      // Display the survey
+      displaySurvey(survey);
+      
+      // Handle form submission
+      document.getElementById('surveyForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        submitResponse(survey);
+      });
+    });
+    
+    function displaySurvey(survey) {
+      console.log('Survey data:', JSON.stringify(survey, null, 2)); // Debug log
+      document.getElementById('surveyTitle').textContent = survey.title;
+      document.getElementById('surveyDescription').textContent = survey.description || '';
+      
+      const questionsContainer = document.getElementById('questionsContainer');
+      questionsContainer.innerHTML = '';
+      
+      survey.questions.forEach((question, index) => {
+        if (!question) {
+          console.error('Undefined question at index:', index);
+          return; // Skip undefined questions
+        }
+        console.log(`Question ${index}:`, question); // Debug log
+        const questionElement = document.createElement('div');
+        questionElement.className = 'bg-gray-50 p-4 rounded-lg';
+        questionElement.innerHTML = `
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              ${index + 1}. ${question.text || question.questionText}
+              ${question.required ? '<span class="text-red-500">*</span>' : ''}
+            </label>
+            ${renderQuestionInput(question, index)}
+          </div>
+        `;
+        questionsContainer.appendChild(questionElement);
+      });
+      
+      // Show the survey content and hide loading message
+      document.getElementById('loadingMessage').classList.add('hidden');
+      document.getElementById('surveyContent').classList.remove('hidden');
+    }
+    
+    function renderQuestionInput(question, index) {
+      if (!question) {
+        console.error('Undefined question object at index:', index);
+        return '<p class="text-red-500">Error: Invalid question data</p>';
+      }
+      
+      const baseName = `question_${index}`;
+      // Normalize question type
+      let questionType = (question.type || question.questionType || 'text').toLowerCase();
+      
+      // Handle different variations of question types
+      if (questionType.includes('multiple') || questionType === 'mcq') {
+        questionType = 'mcq';
+      } else if (questionType === 'rating' || questionType === 'scale') {
+        questionType = 'rating';
+      } else if (questionType === 'date' || questionType === 'datepicker') {
+        questionType = 'date';
+      } else if (questionType === 'text' || questionType === 'shorttext') {
+        questionType = 'text';
+      } else if (questionType === 'textarea' || questionType === 'longtext') {
+        questionType = 'textarea';
+      } else if (questionType === 'checkbox' || questionType === 'checkboxes') {
+        questionType = 'checkbox';
+      } else if (questionType === 'likert' || questionType === 'scale') {
+        questionType = 'likert';
+      }
+      
+      console.log(`Rendering question ${index} (normalized type: ${questionType}):`, question);
+      
+      switch(questionType) {
+        case 'text':
+          return `
+            <input type="text" 
+                   name="${baseName}" 
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                   ${question.required ? 'required' : ''}>
+          `;
+          
+        case 'textarea':
+          return `
+            <textarea name="${baseName}" 
+                      rows="3" 
+                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                      ${question.required ? 'required' : ''}></textarea>
+          `;
+          
+        case 'mcq':
+        case 'multiplechoice':
+          if (!question.options || question.options.length === 0) {
+            return '<p class="text-red-500 text-sm">No options provided for this question</p>';
+          }
+          
+          return question.options.map((option, i) => `
+            <div class="mt-2 flex items-center">
+              <input id="${baseName}_${i}" 
+                     name="${baseName}" 
+                     type="radio" 
+                     value="${option}" 
+                     class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                     ${question.required ? 'required' : ''}>
+              <label for="${baseName}_${i}" class="ml-3 block text-sm font-medium text-gray-700">
+                ${option}
+              </label>
+            </div>
+          `).join('');
+          
+        case 'checkbox':
+          if (!question.options || question.options.length === 0) {
+            return '<p class="text-red-500 text-sm">No options provided for this question</p>';
+          }
+          
+          return question.options.map((option, i) => `
+            <div class="mt-2 flex items-center">
+              <input id="${baseName}_${i}" 
+                     name="${baseName}[]" 
+                     type="checkbox" 
+                     value="${option}" 
+                     class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                     ${question.required ? 'required' : ''}>
+              <label for="${baseName}_${i}" class="ml-3 block text-sm font-medium text-gray-700">
+                ${option}
+              </label>
+            </div>
+          `).join('');
+          
+        case 'rating':
+          const ratingHtml = `
+            <div class="rating-container flex items-center mt-2 space-x-1" data-base-name="${baseName}">
+              ${[1, 2, 3, 4, 5].map(star => `
+                <button type="button" class="star-btn text-gray-300 hover:text-yellow-400 focus:outline-none" data-rating="${star}">
+                  <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                </button>
+              `).join('')}
+              <input type="hidden" name="${baseName}" id="${baseName}_rating" ${question.required ? 'required' : ''}>
+            </div>`;
+
+          // Initialize rating functionality after the DOM is updated
+          setTimeout(() => {
+            document.querySelectorAll('.rating-container').forEach(container => {
+              const baseName = container.dataset.baseName;
+              container.querySelectorAll('.star-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                  const rating = e.currentTarget.getAttribute('data-rating');
+                  document.getElementById(`${baseName}_rating`).value = rating;
+                  // Update star colors
+                  const stars = container.querySelectorAll('.star-btn');
+                  stars.forEach((star, i) => {
+                    const isFilled = i < rating;
+                    star.classList.toggle('text-yellow-400', isFilled);
+                    star.classList.toggle('text-gray-300', !isFilled);
+                  });
+                });
+              });
+            });
+          }, 0);
+          
+          return ratingHtml;
+          
+        case 'likert':
+          const likertScale = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'];
+          return `
+            <div class="overflow-x-auto mt-2">
+              <table class="w-full border-collapse">
+                <thead>
+                  <tr>
+                    <th class="border p-2 text-left">${question.likertStatement || 'Statement'}</th>
+                    ${likertScale.map(item => 
+                      `<th class="border p-2 text-center">${item}</th>`
+                    ).join('')}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="border p-2">${question.text}</td>
+                    ${likertScale.map((_, i) => 
+                      `<td class="border p-2 text-center">
+                        <input type="radio" name="${baseName}" value="${i + 1}" 
+                               class="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                               ${question.required ? 'required' : ''}>
+                      </td>`
+                    ).join('')}
+                  </tr>
+                </tbody>
+              </table>
+            </div>`;
+          
+        case 'date':
+          return `
+            <input type="date" 
+                   name="${baseName}" 
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                   ${question.required ? 'required' : ''}>`;
+          
+        default:
+          console.warn('Unsupported question type:', question.type);
+          return `<p class="text-red-500">This question type is not supported in this version.</p>`;
+      }
+    }
+    
+    function submitResponse(survey) {
+      const form = document.getElementById('surveyForm');
+      const formData = new FormData(form);
+      const responses = [];
+      
+      // Convert form data to response object
+      survey.questions.forEach((question, index) => {
+        const baseName = `question_${index}`;
+        const questionResponse = {
+          questionId: index,
+          questionText: question.text || question.questionText || `Question ${index + 1}`,
+          questionType: question.type || question.questionType || 'text',
+          answer: (question.type === 'checkbox' || question.questionType === 'checkbox') ? [] : ''
+        };
+        
+        if (questionResponse.questionType === 'checkbox') {
+          const checkboxes = form.querySelectorAll(`input[name^="${baseName}["]:checked, input[name="${baseName}[]"]:checked`);
+          questionResponse.answer = Array.from(checkboxes).map(cb => cb.value);
+        } else {
+          questionResponse.answer = formData.get(baseName) || '';
+        }
+        
+        responses.push(questionResponse);
+      });
+      
+      // Create response object
+      const response = {
+        id: Date.now().toString(),
+        surveyId: survey.id,
+        surveyTitle: survey.title,
+        submittedAt: new Date().toISOString(),
+        responses: responses
+      };
+      
+      // Save to localStorage
+      const allResponses = JSON.parse(localStorage.getItem('surveyResponses') || '{}');
+      if (!allResponses[survey.id]) {
+        allResponses[survey.id] = [];
+      }
+      allResponses[survey.id].push(response);
+      localStorage.setItem('surveyResponses', JSON.stringify(allResponses));
+      
+      // Update response count in survey
+      const surveys = JSON.parse(localStorage.getItem('surveys') || '[]');
+      const surveyIndex = surveys.findIndex(s => s.id === survey.id);
+      if (surveyIndex !== -1) {
+        surveys[surveyIndex].responses = (surveys[surveyIndex].responses || 0) + 1;
+        localStorage.setItem('surveys', JSON.stringify(surveys));
+      }
+      
+      // Show thank you message
+      document.getElementById('surveyForm').classList.add('hidden');
+      document.getElementById('thankYouMessage').classList.remove('hidden');
+    }
+    
+    function showError(message) {
+      const container = document.getElementById('surveyContainer');
+      container.innerHTML = `
+        <div class="text-center py-12">
+          <svg class="mx-auto h-12 w-12 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <h2 class="mt-4 text-xl font-semibold text-gray-900">Error</h2>
+          <p class="mt-2 text-gray-600">${message}</p>
+          <div class="mt-6">
+            <a href="view-survey.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              Back to Surveys
+            </a>
+          </div>
+        </div>
+      `;
+    }
+  </script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

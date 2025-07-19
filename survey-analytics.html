@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Survey Analytics</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <style>
+    .chart-container {
+      position: relative;
+      margin: 20px 0;
+      height: 300px;
+    }
+    .survey-card {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .survey-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <!-- Navigation -->
+  <nav class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 flex items-center justify-between h-16">
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="flex items-center gap-3">
+          <svg width="32" height="32" fill="none" viewBox="0 0 48 48">
+            <rect x="4" y="8" width="40" height="32" rx="8" fill="#38bdf8"/>
+            <rect x="12" y="16" width="24" height="16" rx="4" fill="#34d399"/>
+          </svg>
+          <span class="font-semibold text-lg tracking-tight text-slate-800">SmartSurvey</span>
+        </a>
+      </div>
+      <div class="hidden md:flex gap-8 text-sm font-medium">
+        <div class="relative group">
+          <button id="featuresBtn" type="button" class="text-gray-600 hover:text-blue-600 transition font-medium flex items-center gap-1 focus:outline-none">
+            Features
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div id="featuresDropdown" class="absolute left-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-30 flex">
+            <div class="flex flex-col w-full">
+              <a href="survey-creation.html" class="block px-5 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">Survey Creation</a>
+              <a href="distribution.html" class="block px-5 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">Distribution & Sharing</a>
+              <a href="survey-analytics.html" class="block px-5 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">Response Collection</a>
+            </div>
+          </div>
+        </div>
+        <a href="index.html#how" class="hover:text-sky-500 transition-colors">How it Works</a>
+        <a href="view-survey.html" class="hover:text-sky-500 transition-colors">View Surveys</a>
+        <a href="survey-analytics.html" class="hover:text-sky-500 transition-colors">Response Collection</a>
+        <a href="index.html#contact" class="hover:text-sky-500 transition-colors">Contact</a>
+      </div>
+      <div class="flex gap-2">
+        <a href="login.html" id="login-button" class="rounded-lg px-4 py-2 font-medium hover:bg-sky-50 text-sky-600 transition-colors">Login</a>
+        <a href="login.html" id="signup-button" class="rounded-lg px-4 py-2 font-medium bg-sky-500 text-white shadow hover:bg-sky-600 transition-colors">Sign Up</a>
+        <button id="logout-button" class="rounded-lg px-4 py-2 font-medium bg-red-500 text-white shadow hover:bg-red-600 transition-colors" style="display:none;">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="py-10">
+    <main>
+      <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <!-- Loading State -->
+        <div id="loading" class="text-center py-10">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+          <p class="mt-3 text-gray-600">Loading analytics...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="error" class="hidden text-center py-10 bg-red-50 border border-red-200 rounded-md">
+          <h3 class="text-lg font-medium text-red-800">Failed to load data</h3>
+          <p id="errorMessage" class="mt-2 text-sm text-red-700"></p>
+        </div>
+
+        <!-- Survey List -->
+        <div id="surveyList" class="hidden">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <h2 class="text-2xl font-bold text-gray-900">Your Surveys</h2>
+            <div class="w-full md:w-72">
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <input type="text" id="surveySearch" class="block w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Search surveys...">
+              </div>
+            </div>
+          </div>
+          
+          <div id="surveysContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <!-- Survey cards will be inserted here -->
+          </div>
+        </div>
+
+        <!-- Analytics Dashboard -->
+        <div id="analyticsDashboard" class="hidden">
+          <div class="flex justify-between items-center mb-6">
+            <h2 id="surveyTitle" class="text-3xl font-bold text-gray-900"></h2>
+            <button id="backButton" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+              &larr; Back to Surveys
+            </button>
+          </div>
+          
+          <!-- Summary Cards -->
+          <div id="summaryCards" class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+            <!-- Summary cards will be inserted here -->
+          </div>
+
+          <!-- Question Analytics -->
+          <div id="questionAnalyticsContainer" class="space-y-8">
+            <!-- Question charts will be inserted here -->
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<script>
+  const loadingEl = document.getElementById('loading');
+  const errorEl = document.getElementById('error');
+  const errorMessageEl = document.getElementById('errorMessage');
+  const surveyListEl = document.getElementById('surveyList');
+  const surveysContainer = document.getElementById('surveysContainer');
+  const analyticsDashboardEl = document.getElementById('analyticsDashboard');
+  const surveyTitleEl = document.getElementById('surveyTitle');
+  const summaryCardsEl = document.getElementById('summaryCards');
+  const questionAnalyticsContainer = document.getElementById('questionAnalyticsContainer');
+  const backButton = document.getElementById('backButton');
+
+  let charts = [];
+
+  function showError(message) {
+    loadingEl.classList.add('hidden');
+    errorMessageEl.textContent = message;
+    errorEl.classList.remove('hidden');
+  }
+
+  // Array of 20 reliable meeting and classroom themed images from Unsplash
+  const surveyImages = [
+    'https://images.unsplash.com/photo-1541178735493-479c1a27ed24?w=800&auto=format&fit=crop&q=60', // Classroom discussion
+    'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=60', // Team meeting
+    'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=60', // Conference room
+    'https://images.unsplash.com/photo-1577896851231-70ef1883c5d4?w=800&auto=format&fit=crop&q=60', // University lecture
+    'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&auto=format&fit=crop&q=60', // Business presentation
+    'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&auto=format&fit=crop&q=60', // Graduation ceremony
+    'https://images.unsplash.com/photo-1524178632366-2fb5c3fe1786?w=800&auto=format&fit=crop&q=60', // Workshop session
+    'https://images.unsplash.com/photo-1505373877841-8d25f96d9d2b?w=800&auto=format&fit=crop&q=60', // Boardroom meeting
+    'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=60', // Team workshop
+    'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&auto=format&fit=crop&q=60', // Group discussion
+    'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&auto=format&fit=crop&q=60', // Corporate training
+    'https://images.unsplash.com/photo-1522071909394-4f0b9f17040f?w=800&auto=format&fit=crop&q=60', // Team huddle
+    'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&auto=format&fit=crop&q=60', // Seminar
+    'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=60', // Group project
+    'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&auto=format&fit=crop&q=60', // Strategy meeting
+    'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=60', // Focus group
+    'https://images.unsplash.com/photo-1577896851231-70ef1883c5d4?w=800&auto=format&fit=crop&q=60', // Lecture hall
+    'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&auto=format&fit=crop&q=60', // Graduation
+    'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=60', // Meeting room
+    'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=60'  // Group discussion 2
+  ];
+  
+  // Function to get a random image URL from the surveyImages array
+  function getRandomSurveyImage() {
+    const randomIndex = Math.floor(Math.random() * surveyImages.length);
+    return surveyImages[randomIndex];
+  }
+
+  // Search functionality
+  function filterSurveys(searchTerm) {
+    const cards = document.querySelectorAll('.survey-card');
+    cards.forEach(card => {
+      const title = card.querySelector('h3').textContent.toLowerCase();
+      const matches = title.includes(searchTerm.toLowerCase());
+      card.style.display = matches ? 'block' : 'none';
+    });
+  }
+
+  // Setup search event listener
+  function setupSearch() {
+    const searchInput = document.getElementById('surveySearch');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        filterSurveys(e.target.value);
+      });
+    }
+  }
+
+  function renderSurveyList() {
+    const surveys = JSON.parse(localStorage.getItem('surveys') || '[]');
+    const responses = JSON.parse(localStorage.getItem('surveyResponses') || '{}');
+    
+    surveysContainer.innerHTML = '';
+    if (surveys.length === 0) {
+      surveysContainer.innerHTML = `
+        <div class="col-span-full text-center py-12">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <h3 class="mt-2 text-lg font-medium text-gray-900">No surveys found</h3>
+          <p class="mt-1 text-gray-500">Get started by creating a new survey.</p>
+          <div class="mt-6">
+            <a href="create-survey.html" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+              </svg>
+              New Survey
+            </a>
+          </div>
+        </div>
+      `;
+    } else {
+      surveys.forEach((survey, index) => {
+        const responseCount = responses[survey.id] ? responses[survey.id].length : 0;
+        // Generate a consistent index based on survey ID
+        const imageIndex = Math.abs(survey.id.split('').reduce((a, b) => (a << 5) - a + b.charCodeAt(0), 0)) % surveyImages.length;
+        const surveyImage = surveyImages[imageIndex];
+        const createdDate = new Date(survey.createdAt);
+        const formattedDate = createdDate.toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric' 
+        });
+        
+        const card = document.createElement('div');
+        card.className = 'bg-white overflow-hidden shadow rounded-lg survey-card transition-all duration-200 hover:shadow-md border border-gray-100';
+        card.dataset.surveyId = survey.id;
+        card.innerHTML = `
+          <div class="h-32 bg-gray-100 overflow-hidden relative">
+            <img src="${surveyImage}" alt="Survey" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=60';">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+          </div>
+          <div class="p-3">
+            <div class="flex items-center justify-between mb-1">
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-50 text-indigo-700">
+                ${responseCount} ${responseCount === 1 ? 'Response' : 'Res'}
+              </span>
+              <span class="text-xs text-gray-500">${formattedDate}</span>
+            </div>
+            <h3 class="text-sm font-semibold text-gray-900 line-clamp-2 leading-tight">${survey.title}</h3>
+            <div class="mt-2 flex justify-between items-center">
+              <span class="text-xs text-gray-500">${survey.questions?.length || 0} Qs</span>
+              <button class="text-xs text-indigo-600 hover:text-indigo-800 font-medium focus:outline-none">
+                View →
+              </button>
+            </div>
+          </div>
+        `;
+        
+        // Add click handler to the card
+        card.addEventListener('click', (e) => {
+          // Don't trigger if clicking on the view analytics button
+          if (!e.target.closest('button')) {
+            loadAnalytics(survey.id);
+          }
+        });
+        
+        // Add click handler specifically to the button
+        const button = card.querySelector('button');
+        if (button) {
+          button.addEventListener('click', (e) => {
+            e.stopPropagation();
+            loadAnalytics(survey.id);
+          });
+        }
+        
+        surveysContainer.appendChild(card);
+      });
+      
+      // Setup search after rendering
+      setupSearch();
+    }
+    loadingEl.classList.add('hidden');
+    surveyListEl.classList.remove('hidden');
+  }
+
+  function renderAnalytics(data) {
+    console.log('Rendering analytics with data:', data);
+    
+    // Make sure we have valid data
+    if (!data || !data.survey) {
+      console.error('Invalid data format:', data);
+      showError('No survey data found');
+      return;
+    }
+    
+    // Update the page title and summary
+    surveyTitleEl.textContent = data.survey.title || 'Survey Analytics';
+    
+    // Calculate summary stats
+    const totalResponses = data.questionAnalytics[0]?.data?.totalResponses || 0;
+    const lastResponse = data.questionAnalytics[0]?.data?.lastResponse || null;
+    
+    // Render summary cards
+    summaryCardsEl.innerHTML = `
+        <div class="bg-white overflow-hidden shadow rounded-lg p-5">
+            <p class="text-sm font-medium text-gray-500 truncate">Total Responses</p>
+            <p class="mt-1 text-3xl font-semibold text-gray-900">${totalResponses}</p>
+        </div>
+        <div class="bg-white overflow-hidden shadow rounded-lg p-5">
+            <p class="text-sm font-medium text-gray-500 truncate">Questions</p>
+            <p class="mt-1 text-3xl font-semibold text-gray-900">${data.questionAnalytics?.length || 0}</p>
+        </div>
+        <div class="bg-white overflow-hidden shadow rounded-lg p-5">
+            <p class="text-sm font-medium text-gray-500 truncate">Last Response</p>
+            <p class="mt-1 text-3xl font-semibold text-gray-900">${lastResponse ? new Date(lastResponse).toLocaleDateString() : 'N/A'}</p>
+        </div>
+    `;
+
+    // Clear previous charts and content
+    questionAnalyticsContainer.innerHTML = '';
+    charts.forEach(chart => chart.destroy());
+    charts = [];
+    
+    // Check if we have questions to display
+    if (!data.questionAnalytics || !Array.isArray(data.questionAnalytics) || data.questionAnalytics.length === 0) {
+      questionAnalyticsContainer.innerHTML = `
+        <div class="bg-white p-6 rounded-lg shadow">
+          <p class="text-gray-500">No questions found in this survey.</p>
+        </div>
+      `;
+      return;
+    }
+
+    // Render each question with its chart
+    data.questionAnalytics.forEach((q, index) => {
+      console.log(`Rendering question ${index + 1}:`, q);
+      
+      // Create container for question and chart
+      const container = document.createElement('div');
+      container.className = 'bg-white p-6 rounded-lg shadow mb-6';
+      
+      // Create flex container for side by side layout
+      const flexContainer = document.createElement('div');
+      flexContainer.className = 'flex flex-col md:flex-row gap-6 items-start';
+      
+      // Left side - Question (40% width)
+      const questionDiv = document.createElement('div');
+      questionDiv.className = 'md:w-2/5 w-full';
+      
+      // Get the actual question text from the survey
+      const questionText = q.question || `Question ${index + 1}`;
+      const questionType = q.type || 'text';
+      
+      questionDiv.innerHTML = `
+        <div class="bg-blue-50 p-4 rounded-lg h-full">
+          <div class="flex items-center mb-3">
+            <span class="bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded mr-2">Q${index + 1}</span>
+            <span class="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">${questionType}</span>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-800 mb-3">${questionText}</h3>
+          <div class="bg-white p-3 rounded border border-gray-200 mt-3">
+            <p class="text-sm text-gray-600">
+              <span class="response-count">0 responses</span>
+            </p>
+          </div>
+        </div>
+      `;
+      
+      // Right side - Chart (60% width)
+      const chartDiv = document.createElement('div');
+      chartDiv.className = 'md:w-3/5 w-full';
+      const chartContainer = document.createElement('div');
+      chartContainer.className = 'chart-container';
+      chartContainer.style.height = '250px';
+      chartContainer.style.minHeight = '250px';
+      const canvas = document.createElement('canvas');
+      chartContainer.appendChild(canvas);
+      chartDiv.appendChild(chartContainer);
+      
+      // Add both to flex container
+      flexContainer.appendChild(questionDiv);
+      flexContainer.appendChild(chartDiv);
+      container.appendChild(flexContainer);
+      questionAnalyticsContainer.appendChild(container);
+
+      // Generate chart based on question type
+      if ((q.type === 'multiple-choice' || q.type === 'checkbox' || q.type === 'rating') && q.data) {
+        // Filter out the totalResponses from the data
+        const responseData = { ...q.data };
+        const totalResponses = responseData.totalResponses || 0;
+        delete responseData.totalResponses;
+        
+        const labels = Object.keys(responseData);
+        const values = Object.values(responseData).map(d => d?.count || 0);
+        
+        // Update the response count in the question div
+        questionDiv.querySelector('.response-count').textContent = `${totalResponses} ${totalResponses === 1 ? 'response' : 'responses'}`;
+        
+        if (labels.length === 0 || values.length === 0 || totalResponses === 0) {
+          chartDiv.innerHTML = `
+            <div class="flex items-center justify-center h-full">
+              <p class="text-gray-500 text-center">No responses yet</p>
+            </div>
+          `;
+          return;
+        }
+        
+        const chartData = {
+          labels: labels.map((label, i) => {
+            const percentage = Math.round((values[i] / totalResponses) * 100);
+            return `${label} (${percentage}%)`;
+          }),
+          datasets: [{
+            data: values,
+            backgroundColor: [
+              '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6',
+              '#EC4899', '#14B8A6', '#F97316', '#6366F1', '#8B5CF6'
+            ],
+            borderWidth: 1,
+            borderColor: '#fff'
+          }]
+        };
+        
+        // Create pie chart with improved styling
+        const chart = new Chart(canvas, { 
+          type: 'pie', 
+          data: chartData,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'right',
+                labels: {
+                  padding: 15,
+                  font: {
+                    size: 12
+                  },
+                  usePointStyle: true,
+                  boxWidth: 10
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                    const value = context.raw;
+                    const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                    return `${context.label}: ${value} (${percentage}%)`;
+                  }
+                }
+              },
+              datalabels: {
+                formatter: (value, ctx) => {
+                  const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                  return value > 0 ? `${value}` : '';
+                },
+                color: '#fff',
+                font: {
+                  weight: 'bold',
+                  size: 12
+                },
+                textAlign: 'center',
+                padding: 0
+              }
+            },
+            cutout: '60%',
+            animation: {
+              animateScale: true,
+              animateRotate: true
+            }
+          },
+          plugins: [ChartDataLabels]
+        });
+        
+        charts.push(chart);
+        
+      } else if (q.type === 'rating') {
+        // For rating questions, show a pie chart of star ratings
+        const ratings = [0, 0, 0, 0, 0];
+        if (q.data.ratings) {
+          q.data.ratings.forEach(rating => {
+            if (rating >= 1 && rating <= 5) {
+              ratings[rating - 1]++;
+            }
+          });
+        }
+        
+        const chartData = {
+          labels: ['1 Star', '2 Stars', '3 Stars', '4 Stars', '5 Stars'],
+          datasets: [{
+            data: ratings,
+            backgroundColor: [
+              '#EF4444', '#F97316', '#F59E0B', '#10B981', '#059669'
+            ],
+            borderWidth: 1
+          }]
+        };
+        
+        // Add average rating to question div
+        questionDiv.innerHTML += `
+          <div class="mt-3 p-3 bg-blue-100 rounded-lg">
+            <p class="text-sm font-medium text-blue-800">Average Rating</p>
+            <p class="text-2xl font-bold text-blue-900">${q.data.average || '0.0'}<span class="text-lg text-blue-700">/5</span></p>
+          </div>
+        `;
+        
+        charts.push(new Chart(canvas, {
+          type: 'pie',
+          data: chartData,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'right'
+              }
+            }
+          }
+        }));
+        
+      } else {
+        // For text questions, show response count
+        chartDiv.innerHTML = `
+          <div class="text-center py-8">
+            <div class="text-4xl font-bold text-gray-700">${q.data.totalResponses || '0'}</div>
+            <div class="text-gray-500 mt-2">Text Responses</div>
+          </div>
+        `;
+      }
+    });
+
+    loadingEl.classList.add('hidden');
+    surveyListEl.classList.add('hidden');
+    analyticsDashboardEl.classList.remove('hidden');
+  }
+
+  function loadAnalytics(surveyId) {
+    console.log('Loading analytics for survey ID:', surveyId);
+    analyticsDashboardEl.classList.add('hidden');
+    loadingEl.classList.remove('hidden');
+    
+    try {
+      // Get data from localStorage
+      const surveys = JSON.parse(localStorage.getItem('surveys') || '[]');
+      const allResponses = JSON.parse(localStorage.getItem('surveyResponses') || '{}');
+      
+      // Debug logs
+      console.log('All surveys:', surveys);
+      console.log('All responses:', allResponses);
+      
+      // Find the survey
+      const survey = surveys.find(s => s.id === surveyId);
+      if (!survey) {
+        throw new Error('Survey not found');
+      }
+      
+      console.log('Found survey:', survey);
+      
+      // Get responses for this survey
+      const surveyResponses = allResponses[surveyId] || [];
+      console.log('Survey responses:', surveyResponses);
+      
+      const questionAnalytics = [];
+      
+      // Process each question
+      if (survey.questions && Array.isArray(survey.questions)) {
+        console.log('Processing questions:', survey.questions);
+        
+        survey.questions.forEach((question, qIndex) => {
+          if (!question) return;
+          
+          console.log(`Processing question ${qIndex + 1}:`, question);
+          
+          // Determine the question type based on available properties
+          let questionType = question.type || question.questionType || 'text';
+          
+          // If it's a multiple choice question but type is missing, infer it from options
+          if ((!questionType || questionType === 'text') && question.options && question.options.length > 0) {
+            questionType = 'multiple-choice';
+          }
+          
+          const questionData = {
+            question: question.questionText || question.question || question.text || `Question ${qIndex + 1}`,
+            type: questionType,
+            options: question.options || [],
+            data: {}
+          };
+          
+          console.log(`Processed question ${qIndex + 1}:`, questionData);
+          
+          // Initialize response tracking
+          if (questionData.type === 'multiple-choice' || questionData.type === 'checkbox' || questionData.type === 'rating') {
+            // For multiple choice/checkbox/rating questions
+            const optionCounts = {};
+            
+            // Initialize counts for each option
+            (questionData.options || []).forEach(option => {
+              optionCounts[option] = { count: 0 };
+            });
+            
+            // Count responses
+            let totalResponses = 0;
+            surveyResponses.forEach(response => {
+              let qResponse = response.responses && 
+                response.responses.find(r => 
+                  r.questionId === qIndex || 
+                  r.questionId === question.id ||
+                  r.questionText === questionData.question
+                );
+              
+              // If still no match, try to find by index
+              if (!qResponse && response.responses && response.responses[qIndex]) {
+                qResponse = response.responses[qIndex];
+              }
+              
+              if (qResponse && qResponse.answer !== undefined && qResponse.answer !== null) {
+                totalResponses++;
+                const answers = Array.isArray(qResponse.answer) ? qResponse.answer : [qResponse.answer];
+                
+                answers.forEach(ans => {
+                  if (optionCounts[ans] !== undefined) {
+                    optionCounts[ans].count++;
+                  } else if (questionData.type === 'rating' && !isNaN(parseInt(ans))) {
+                    // For rating questions, count the actual rating
+                    const rating = Math.round(parseInt(ans));
+                    if (rating >= 1 && rating <= 5) {
+                      const ratingLabel = `${rating} Star${rating > 1 ? 's' : ''}`;
+                      if (!optionCounts[ratingLabel]) {
+                        optionCounts[ratingLabel] = { count: 0 };
+                      }
+                      optionCounts[ratingLabel].count++;
+                    }
+                  }
+                });
+              }
+            });
+            
+            // Add total responses to the data
+            questionData.data = optionCounts;
+            questionData.data.totalResponses = totalResponses;
+            
+            // For rating questions, calculate average
+            if (questionData.type === 'rating') {
+              let totalRating = 0;
+              let ratingCount = 0;
+              
+              Object.entries(optionCounts).forEach(([key, value]) => {
+                const match = key.match(/(\d+)/);
+                if (match) {
+                  const stars = parseInt(match[1]);
+                  totalRating += stars * value.count;
+                  ratingCount += value.count;
+                }
+              });
+              
+              questionData.data.average = ratingCount > 0 ? (totalRating / ratingCount).toFixed(1) : 0;
+            }
+            
+          } else if (question.type === 'rating') {
+            // For rating questions
+            let total = 0;
+            let count = 0;
+            const ratings = [];
+            
+            surveyResponses.forEach(response => {
+              const qResponse = response.responses && 
+                (response.responses.find(r => r.questionId === qIndex) || 
+                 response.responses.find(r => r.questionId === question.id));
+                 
+              if (qResponse && qResponse.answer) {
+                const rating = parseFloat(qResponse.answer);
+                if (!isNaN(rating) && rating >= 1 && rating <= 5) {
+                  total += rating;
+                  count++;
+                  ratings.push(rating);
+                }
+              }
+            });
+            
+            questionData.data = {
+              average: count > 0 ? (total / count).toFixed(1) : 0,
+              ratings: ratings
+            };
+            
+          } else {
+            // For text questions
+            const sampleResponses = [];
+            surveyResponses.slice(0, 5).forEach(response => {
+              const qResponse = response.responses && 
+                (response.responses.find(r => r.questionId === qIndex) || 
+                 response.responses.find(r => r.questionId === question.id));
+                 
+              if (qResponse && qResponse.answer) {
+                const answer = Array.isArray(qResponse.answer) 
+                  ? qResponse.answer.join(', ')
+                  : qResponse.answer.toString();
+                sampleResponses.push(answer);
+              }
+            });
+            
+            questionData.data = {
+              totalResponses: surveyResponses.length,
+              sampleResponses: sampleResponses
+            };
+          }
+          
+          console.log(`Question ${qIndex + 1} data:`, questionData);
+          questionAnalytics.push(questionData);
+        });
+      }
+      
+      const analyticsData = {
+        survey: survey,
+        summary: {
+          totalResponses: surveyResponses.length,
+          completionRate: surveyResponses.length > 0 ? 100 : 0,
+          lastResponse: surveyResponses.length > 0 ? surveyResponses[surveyResponses.length - 1].submittedAt : null
+        },
+        questionAnalytics: questionAnalytics
+      };
+      
+      renderAnalytics(analyticsData);
+      
+    } catch (err) {
+      console.error('Error loading analytics:', err);
+      showError('Failed to load survey data. ' + (err.message || ''));
+    }
+  }
+
+  function main() {
+    try {
+      renderSurveyList();
+    } catch (err) {
+      showError(err.message);
+    }
+  }
+
+  backButton.addEventListener('click', () => {
+    analyticsDashboardEl.classList.add('hidden');
+    surveyListEl.classList.remove('hidden');
+  });
+
+  main();
+</script>
+<script src="js/auth.js"></script>
+</body>
+</html>

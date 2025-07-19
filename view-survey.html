@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Surveys - SmartSurvey</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <!-- Sticky Navigation -->
+  <nav class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 flex items-center justify-between h-16">
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="flex items-center gap-3">
+          <svg width="32" height="32" fill="none" viewBox="0 0 48 48">
+            <rect x="4" y="8" width="40" height="32" rx="8" fill="#38bdf8"/>
+            <rect x="12" y="16" width="24" height="16" rx="4" fill="#34d399"/>
+          </svg>
+          <span class="font-semibold text-lg tracking-tight text-slate-800">SmartSurvey</span>
+        </a>
+      </div>
+      <div class="hidden md:flex gap-8 text-sm font-medium">
+        <div class="relative group">
+          <button id="featuresBtn" type="button" class="text-gray-600 hover:text-blue-600 transition font-medium flex items-center gap-1 focus:outline-none">
+            Features
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div id="featuresDropdown" class="absolute left-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-30 flex">
+            <div class="flex flex-col w-full">
+              <a href="survey-creation.html" class="block px-5 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">Survey Creation</a>
+              <a href="distribution.html" class="block px-5 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">Distribution & Sharing</a>
+              <a href="survey-analytics.html" class="block px-5 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">Response Collection</a>
+            </div>
+          </div>
+        </div>
+        <a href="index.html#how" class="hover:text-sky-500 transition-colors">How it Works</a>
+        <a href="view-survey.html" class="hover:text-sky-500 transition-colors">View Surveys</a>
+        <a href="survey-analytics.html" class="hover:text-sky-500 transition-colors">Response Collection</a>
+        <a href="index.html#contact" class="hover:text-sky-500 transition-colors">Contact</a>
+      </div>
+      <div class="flex gap-2">
+        <a href="login.html" id="login-button" class="rounded-lg px-4 py-2 font-medium hover:bg-sky-50 text-sky-600 transition-colors">Login</a>
+        <a href="login.html" id="signup-button" class="rounded-lg px-4 py-2 font-medium bg-sky-500 text-white shadow hover:bg-sky-600 transition-colors">Sign Up</a>
+        <button id="logout-button" class="rounded-lg px-4 py-2 font-medium bg-red-500 text-white shadow hover:bg-red-600 transition-colors" style="display:none;">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="sm:flex sm:items-center">
+      <div class="sm:flex-auto">
+        <h1 class="text-2xl font-semibold text-gray-900">Surveys</h1>
+        <p class="mt-2 text-sm text-gray-700">A list of all your surveys including their status and completion rates.</p>
+      </div>
+      <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+        <button type="button" class="inline-flex items-center justify-center rounded-md border border-transparent bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 sm:w-auto">
+          <i data-lucide="plus" class="mr-2 h-4 w-4"></i>
+          New Survey
+        </button>
+      </div>
+    </div>
+    
+    <!-- Search and Filters -->
+    <div class="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+      <div class="relative w-full sm:max-w-xs mb-4 sm:mb-0">
+        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+          <i data-lucide="search" class="h-4 w-4 text-gray-400"></i>
+        </div>
+        <input type="text" name="search" id="search" class="block w-full rounded-md border-gray-300 pl-10 pr-3 py-2 text-sm focus:border-sky-500 focus:ring-sky-500" placeholder="Search surveys...">
+      </div>
+      <div class="flex space-x-3">
+        <div class="relative">
+          <select id="sort" name="sort" class="rounded-md border-gray-300 py-2 pl-3 pr-8 text-sm focus:border-sky-500 focus:outline-none focus:ring-sky-500">
+            <option>Last Modified</option>
+            <option>Alphabetical (A-Z)</option>
+            <option>Alphabetical (Z-A)</option>
+            <option>Newest First</option>
+            <option>Oldest First</option>
+          </select>
+        </div>
+        <button type="button" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2">
+          <i data-lucide="filter" class="mr-2 h-4 w-4"></i>
+          More Filters
+        </button>
+      </div>
+    </div>
+
+    <!-- Survey Grid -->
+    <div id="surveysContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+      <!-- Surveys will be dynamically inserted here -->
+    </div>
+
+    <!-- No Surveys Message (Hidden by default) -->
+    <div id="noSurveysMessage" class="hidden text-center py-12">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900">No surveys found</h3>
+      <p class="mt-1 text-sm text-gray-500">Create your first survey to get started.</p>
+      <div class="mt-6">
+        <a href="survey-creation.html" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+          <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+          </svg>
+          New Survey
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const surveysContainer = document.getElementById('surveysContainer');
+      const noSurveysMessage = document.getElementById('noSurveysMessage');
+      const searchInput = document.getElementById('search');
+      const sortSelect = document.getElementById('sort');
+      let allSurveys = [];
+      
+      // Load surveys from localStorage and render them
+      function loadSurveys() {
+        allSurveys = JSON.parse(localStorage.getItem('surveys') || '[]');
+        renderSurveys(allSurveys);
+      }
+      
+      // Render surveys with optional filtering and sorting
+      function renderSurveys(surveys) {
+        // Clear existing content
+        surveysContainer.innerHTML = '';
+        
+        if (surveys.length === 0) {
+          noSurveysMessage.classList.remove('hidden');
+          return;
+        }
+        
+        noSurveysMessage.classList.add('hidden');
+        
+        // Create a card for each survey
+        surveys.forEach(survey => {
+          const createdDate = new Date(survey.createdAt);
+          const formattedDate = createdDate.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          });
+          
+          // Calculate progress percentage
+          const progress = Math.min(Math.round((survey.responses / survey.responseGoal) * 100), 100);
+          
+          const surveyCard = document.createElement('div');
+          surveyCard.className = 'bg-white overflow-hidden shadow rounded-lg';
+          surveyCard.innerHTML = `
+            <div class="p-6">
+              <div class="flex items-center justify-between">
+                <a href="take-survey.html?id=${survey.id}" class="group">
+                  <h3 class="text-lg font-medium text-gray-900 truncate group-hover:text-blue-600 transition-colors" title="${survey.title}">
+                    ${survey.title}
+                    <span class="inline-block ml-1 text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <i data-lucide="arrow-up-right" class="h-4 w-4 inline-block"></i>
+                    </span>
+                  </h3>
+                </a>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  survey.status === 'published' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                }">
+                  ${survey.status === 'published' ? 'Live' : 'Draft'}
+                </span>
+              </div>
+              <p class="mt-1 text-sm text-gray-500">Created on ${formattedDate} • ${survey.responses} ${survey.responses === 1 ? 'response' : 'responses'}</p>
+              <div class="mt-4">
+                <div class="flex justify-between text-sm text-gray-600 mb-1">
+                  <span>Progress</span>
+                  <span>${progress}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                  <div class="h-2 rounded-full ${
+                    progress < 30 ? 'bg-red-500' : progress < 70 ? 'bg-yellow-500' : 'bg-green-500'
+                  }" style="width: ${progress}%"></div>
+                </div>
+                <div class="mt-2 text-sm text-gray-500">
+                  <span>Goal: ${survey.responseGoal} responses</span>
+                </div>
+              </div>
+              <div class="mt-4 pt-4 border-t border-gray-200">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center">
+                    <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-medium">
+                      ${survey.createdBy ? survey.createdBy.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                    <span class="ml-2 text-sm font-medium text-gray-700">${survey.createdBy || 'Unknown'}</span>
+                  </div>
+                  <div class="flex space-x-2">
+                    <a href="#" class="p-2 text-gray-400 hover:text-blue-500" title="View Analytics">
+                      <i data-lucide="bar-chart-2" class="h-5 w-5"></i>
+                    </a>
+                    <a href="#" class="p-2 text-gray-400 hover:text-green-500 edit-survey" data-id="${survey.id}" title="Edit">
+                      <i data-lucide="edit-2" class="h-5 w-5"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+          surveysContainer.appendChild(surveyCard);
+        });
+        
+        // Re-initialize Lucide icons for dynamically added content
+        lucide.createIcons();
+      }
+      
+      // Filter surveys based on search input
+      function filterSurveys() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const sortBy = sortSelect.value;
+        
+        let filteredSurveys = [...allSurveys];
+        
+        // Apply search filter
+        if (searchTerm) {
+          filteredSurveys = filteredSurveys.filter(survey => 
+            survey.title.toLowerCase().includes(searchTerm) ||
+            (survey.description && survey.description.toLowerCase().includes(searchTerm)) ||
+            (survey.createdBy && survey.createdBy.toLowerCase().includes(searchTerm))
+          );
+        }
+        
+        // Apply sorting
+        filteredSurveys.sort((a, b) => {
+          switch(sortBy) {
+            case 'Alphabetical (A-Z)':
+              return a.title.localeCompare(b.title);
+            case 'Alphabetical (Z-A)':
+              return b.title.localeCompare(a.title);
+            case 'Newest First':
+              return new Date(b.createdAt) - new Date(a.createdAt);
+            case 'Oldest First':
+              return new Date(a.createdAt) - new Date(b.createdAt);
+            default: // Last Modified
+              return new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt);
+          }
+        });
+        
+        renderSurveys(filteredSurveys);
+      }
+      
+      // Event listeners for search and sort
+      searchInput.addEventListener('input', filterSurveys);
+      sortSelect.addEventListener('change', filterSurveys);
+      
+      // Initial load
+      loadSurveys();
+      
+      // Survey deletion has been disabled
+      // The delete button has been removed from the UI
+      
+      // Handle edit survey
+      document.addEventListener('click', function(e) {
+        if (e.target.closest('.edit-survey')) {
+          e.preventDefault();
+          const surveyId = e.target.closest('.edit-survey').dataset.surveyId;
+          // Redirect to edit page with survey ID
+          window.location.href = `survey-creation.html?edit=${surveyId}`;
+        }
+      });
+
+      // Listen for storage events to update the UI when surveys change in other tabs/windows
+      window.addEventListener('storage', function(event) {
+        if (event.key === 'surveys') {
+          loadSurveys();
+        }
+      });
+    });
+  </script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

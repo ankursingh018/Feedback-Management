@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Survey Creation – SmartSurvey</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .blob {
+      position: absolute; border-radius: 100%; filter: blur(18px); opacity: .23; z-index: 0;
+      animation: float 10s ease-in-out infinite alternate;
+    }
+    @keyframes float {
+      to { transform: translateY(-40px) scale(1.05);}
+    }
+    .gradient-border {
+      border: 2px solid transparent;
+      border-radius: 1.25rem;
+      background-clip: padding-box, border-box;
+      background-origin: border-box;
+      background-image: linear-gradient(white, white), linear-gradient(110deg, #a0e9ff 0%, #b5ead7 70%, #e0c3fc 100%);
+    }
+    @keyframes blob1 {
+      0%,100% { transform: translateY(0) scale(1);}
+      50% { transform: translateY(-30px) scale(1.07);}
+    }
+    @keyframes blob2 {
+      0%,100% { transform: translateX(0) scale(1);}
+      50% { transform: translateX(40px) scale(1.1);}
+    }
+    @keyframes blob3 {
+      0%,100% { transform: translate(-50%,0) scale(1);}
+      50% { transform: translate(-50%,30px) scale(1.05);}
+    }
+    .animate-blob1 { animation: blob1 12s ease-in-out infinite; }
+    .animate-blob2 { animation: blob2 14s ease-in-out infinite; }
+    .animate-blob3 { animation: blob3 16s ease-in-out infinite; }
+
+    @keyframes float-dot1 {
+      0%,100% { transform: translateY(0) scale(1);}
+      50% { transform: translateY(-18px) scale(1.08);}
+    }
+    @keyframes float-dot2 {
+      0%,100% { transform: translateY(0) scale(1);}
+      50% { transform: translateY(14px) scale(0.96);}
+    }
+    .animate-float-dot1 { animation: float-dot1 9s ease-in-out infinite; }
+    .animate-float-dot2 { animation: float-dot2 11s ease-in-out infinite; }
+
+    /* Professional polish */
+    .sidebar-pro {
+      background: linear-gradient(120deg, #f0f9ff 60%, #f3e8ff 100%);
+      box-shadow: 0 4px 32px 0 rgba(80,120,255,0.07), 0 1.5px 6px 0 rgba(80,120,255,0.04);
+      border: 1.5px solid #e0e7ff;
+    }
+    .sidebar-pro .active {
+      background: linear-gradient(90deg, #38bdf8 0%, #818cf8 100%);
+      color: #fff !important;
+      box-shadow: 0 2px 8px 0 rgba(56,189,248,0.08);
+    }
+    .survey-card-pro {
+      border-radius: 1.5rem;
+      box-shadow: 0 4px 32px 0 rgba(80,120,255,0.07), 0 1.5px 6px 0 rgba(80,120,255,0.04);
+      border: 1.5px solid #e0e7ff;
+      background: linear-gradient(120deg, #fff 80%, #f0f9ff 100%);
+      transition: box-shadow 0.2s;
+    }
+    .survey-card-pro:focus-within, .survey-card-pro:hover {
+      box-shadow: 0 8px 32px 0 rgba(56,189,248,0.13), 0 2px 8px 0 rgba(80,120,255,0.07);
+      border-color: #a5b4fc;
+    }
+    .question-card-pro {
+      border-radius: 1.25rem;
+      border: 1.5px solid #e0e7ff;
+      background: linear-gradient(120deg, #fff 80%, #f0f9ff 100%);
+      box-shadow: 0 2px 12px 0 rgba(56,189,248,0.06);
+      transition: box-shadow 0.2s, border-color 0.2s;
+    }
+    .question-card-pro:focus-within, .question-card-pro:hover {
+      box-shadow: 0 8px 32px 0 rgba(56,189,248,0.13), 0 2px 8px 0 rgba(80,120,255,0.07);
+      border-color: #818cf8;
+    }
+    .option-input:focus {
+      background: #f0f9ff;
+      border-radius: 0.375rem;
+    }
+    .questionText:focus {
+      background: #f0f9ff;
+      border-radius: 0.375rem;
+    }
+    .addOptionBtn, .remove-option {
+      transition: color 0.15s;
+    }
+    .addOptionBtn:focus, .remove-option:focus {
+      outline: 2px solid #38bdf8;
+    }
+    .delete-question:focus {
+      outline: 2px solid #ef4444;
+    }
+    .logicBtn:focus {
+      outline: 2px solid #818cf8;
+    }
+    .survey-btn-pro {
+      box-shadow: 0 2px 8px 0 rgba(56,189,248,0.07);
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+    .survey-btn-pro:focus {
+      outline: 2px solid #818cf8;
+    }
+    /* Responsive tweaks */
+    @media (max-width: 900px) {
+      .sidebar-pro { max-width: 100%; margin-bottom: 2rem;}
+      .survey-card-pro, .question-card-pro { margin-left: 0; margin-right: 0;}
+    }
+    .question-card-pro table.likert-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: transparent;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .question-card-pro table.likert-table th,
+    .question-card-pro table.likert-table td {
+      padding: 0.5rem 0.75rem;
+      text-align: center;
+    }
+    .question-card-pro table.likert-table th {
+      color: #6366f1;
+      font-weight: 500;
+      font-size: 0.95rem;
+      background: #f0f9ff;
+      border-bottom: 1.5px solid #e0e7ff;
+    }
+    .question-card-pro table.likert-table td:first-child {
+      text-align: left;
+      color: #334155;
+      background: #f8fafc;
+      font-weight: 500;
+      border-right: 1.5px solid #e0e7ff;
+    }
+    .question-card-pro table.likert-table tr {
+      transition: background 0.15s;
+    }
+    .question-card-pro table.likert-table tr:hover {
+      background: #f3f4f6;
+    }
+    .question-card-pro table.likert-table input[type="radio"] {
+      accent-color: #6366f1;
+      width: 1.1rem;
+      height: 1.1rem;
+      cursor: pointer;
+    }
+    .question-card-pro table.likert-table input.option-input {
+      background: transparent;
+      border: none;
+      font-weight: 500;
+      color: #334155;
+      width: 100%;
+      outline: none;
+      padding: 0.25rem 0.5rem;
+    }
+    .question-card-pro table.likert-table input.option-input:focus {
+      background: #e0e7ff;
+      border-radius: 0.375rem;
+    }
+    @media (max-width: 600px) {
+      .question-card-pro table.likert-table th,
+      .question-card-pro table.likert-table td {
+        padding: 0.3rem 0.2rem;
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen text-slate-800 antialiased relative overflow-x-hidden">
+
+  <!-- Advanced Animated Background: Blobs, SVG Waves, and Floating Dots -->
+  <div class="pointer-events-none select-none absolute inset-0 -z-10">
+    <div class="blob bg-blue-200 animate-blob1" style="width:320px;height:320px;left:-120px;top:40px;filter:blur(32px);"></div>
+    <div class="blob bg-green-200 animate-blob2" style="width:220px;height:220px;right:5%;top:140px;filter:blur(24px);"></div>
+    <div class="blob bg-purple-200 animate-blob3" style="width:180px;height:180px;left:50%;bottom:-90px;filter:blur(28px);"></div>
+    <!-- SVG Waves Top -->
+    <svg class="absolute top-0 left-0 w-full h-32 md:h-40 lg:h-56 opacity-40" viewBox="0 0 1440 320">
+      <path fill="#a5b4fc" fill-opacity="0.3" d="M0,224L48,197.3C96,171,192,117,288,117.3C384,117,480,171,576,197.3C672,224,768,224,864,197.3C960,171,1056,117,1152,117.3C1248,117,1344,171,1392,197.3L1440,224L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"></path>
+      <path fill="#c7d2fe" fill-opacity="0.15" d="M0,160L60,154.7C120,149,240,139,360,154.7C480,171,600,213,720,208C840,203,960,149,1080,133.3C1200,117,1320,139,1380,149.3L1440,160L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z"></path>
+    </svg>
+    <!-- SVG Waves Bottom -->
+    <svg class="absolute bottom-0 left-0 w-full h-32 md:h-40 lg:h-56 opacity-30" viewBox="0 0 1440 320">
+      <path fill="#c7d2fe" fill-opacity="0.2" d="M0,288L48,272C96,256,192,224,288,197.3C384,171,480,149,576,154.7C672,160,768,192,864,197.3C960,203,1056,181,1152,176C1248,171,1344,181,1392,186.7L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+      <path fill="#e0c3fc" fill-opacity="0.12" d="M0,320L80,293.3C160,267,320,213,480,197.3C640,181,800,203,960,213.3C1120,224,1280,224,1360,224L1440,224L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
+    </svg>
+    <!-- Animated Floating Dots -->
+    <svg class="absolute left-1/4 top-1/3 w-24 h-24 opacity-60 animate-float-dot1" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="8" fill="#38bdf8" fill-opacity="0.18"/>
+      <circle cx="70" cy="30" r="4" fill="#a5b4fc" fill-opacity="0.18"/>
+      <circle cx="30" cy="70" r="3" fill="#b5ead7" fill-opacity="0.18"/>
+    </svg>
+    <svg class="absolute right-1/4 bottom-1/4 w-20 h-20 opacity-50 animate-float-dot2" viewBox="0 0 100 100">
+      <circle cx="40" cy="60" r="6" fill="#e0c3fc" fill-opacity="0.18"/>
+      <circle cx="70" cy="30" r="3" fill="#38bdf8" fill-opacity="0.18"/>
+    </svg>
+  </div>
+
+  <!-- Sticky Navigation -->
+  <nav class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 flex items-center justify-between h-16">
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="flex items-center gap-3">
+          <svg width="32" height="32" fill="none" viewBox="0 0 48 48">
+            <rect x="4" y="8" width="40" height="32" rx="8" fill="#38bdf8"/>
+            <rect x="12" y="16" width="24" height="16" rx="4" fill="#34d399"/>
+          </svg>
+          <span class="font-semibold text-lg tracking-tight text-slate-800">SmartSurvey</span>
+        </a>
+      </div>
+      <div class="hidden md:flex gap-8 text-sm font-medium">
+        <div class="relative group">
+          <button id="featuresBtn" type="button" class="text-gray-600 hover:text-blue-600 transition font-medium flex items-center gap-1 focus:outline-none">
+            Features
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div id="featuresDropdown" class="absolute left-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-30 flex">
+            <div class="flex flex-col w-full">
+              <a href="survey-creation.html" class="block px-5 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">Survey Creation</a>
+              <a href="distribution.html" class="block px-5 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">Distribution & Sharing</a>
+              <a href="survey-analytics.html" class="block px-5 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">Response Collection</a>
+            </div>
+          </div>
+        </div>
+        <a href="index.html#how" class="hover:text-sky-500 transition-colors">How it Works</a>
+        <a href="view-survey.html" class="hover:text-sky-500 transition-colors">View Surveys</a>
+        <a href="survey-analytics.html" class="hover:text-sky-500 transition-colors">Response Collection</a>
+        <a href="index.html#contact" class="hover:text-sky-500 transition-colors">Contact</a>
+      </div>
+      <div class="flex gap-2">
+        <a href="login.html" id="login-button" class="rounded-lg px-4 py-2 font-medium hover:bg-sky-50 text-sky-600 transition-colors">Login</a>
+        <a href="login.html" id="signup-button" class="rounded-lg px-4 py-2 font-medium bg-sky-500 text-white shadow hover:bg-sky-600 transition-colors">Sign Up</a>
+        <button id="logout-button" class="rounded-lg px-4 py-2 font-medium bg-red-500 text-white shadow hover:bg-red-600 transition-colors" style="display:none;">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Survey Builder Main Content (Sidebar on left, builder on right) -->
+  <div class="max-w-7xl mx-auto flex flex-row gap-8 px-2 md:px-8 py-8 md:py-12">
+    <!-- Sidebar: Question Types & Templates -->
+    <div class="w-full max-w-xs flex-shrink-0 self-start pt-2 sidebar-pro">
+      <div class="rounded-2xl p-6">
+        <h2 class="text-xl font-semibold mb-4 text-slate-800">Question Types</h2>
+        <ul class="space-y-2 mb-8">
+          <li class="flex items-center gap-2 text-blue-600 font-medium active" style="cursor:pointer"><i data-lucide="radio"></i> Multiple Choice</li>
+          <li class="flex items-center gap-2 text-slate-600" style="cursor:pointer"><i data-lucide="check-square"></i> Checkbox</li>
+          <li class="flex items-center gap-2 text-slate-600" style="cursor:pointer"><i data-lucide="type"></i> Text Input</li>
+          <li class="flex items-center gap-2 text-slate-600" style="cursor:pointer"><i data-lucide="align-left"></i> Long Text</li>
+          <li class="flex items-center gap-2 text-slate-600" style="cursor:pointer"><i data-lucide="star"></i> Rating Scale</li>
+          <li class="flex items-center gap-2 text-slate-600" style="cursor:pointer"><i data-lucide="bar-chart-2"></i> Likert Scale</li>
+          <li class="flex items-center gap-2 text-slate-600" style="cursor:pointer"><i data-lucide="calendar"></i> Date Picker</li>
+          <!-- Removed Image Choice button -->
+        </ul>
+        <div>
+          <div class="font-semibold text-slate-700 mb-2">Survey Templates</div>
+          <div class="bg-blue-50 rounded-xl p-3 space-y-2 text-sm">
+            <div class="hover:bg-blue-100 rounded px-2 py-1 cursor-pointer text-blue-700">Customer Satisfaction</div>
+            <div class="hover:bg-blue-100 rounded px-2 py-1 cursor-pointer">Employee Feedback</div>
+            <div class="hover:bg-blue-100 rounded px-2 py-1 cursor-pointer">Product Review</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Main Survey Builder Area (right side) -->
+    <div class="flex-1 flex flex-col gap-6">
+      <!-- Preview, Save & Publish Buttons (top right, just below navbar) -->
+      <div class="flex justify-end gap-2 mb-4">
+        <button id="previewBtn" class="survey-btn-pro px-4 py-2 rounded-lg bg-white border border-gray-200 text-gray-700 font-medium shadow hover:bg-gray-50 transition flex items-center gap-2">
+          <i data-lucide="eye"></i> Preview
+        </button>
+        <button id="saveBtn" class="survey-btn-pro px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 transition flex items-center gap-2">
+          <i data-lucide="save"></i> Save Survey
+        </button>
+      </div>
+      <!-- Survey Title Card -->
+      <div class="survey-card-pro p-6">
+        <input
+          id="surveyTitle"
+          class="w-full text-xl font-semibold mb-2 bg-transparent focus:outline-none"
+          value="Customer Satisfaction Survey"
+        />
+        <textarea
+          id="surveyDesc"
+          class="w-full text-slate-500 text-sm bg-transparent focus:outline-none resize-none"
+          rows="2"
+        >Help us improve our service by sharing your feedback.</textarea>
+      </div>
+      <!-- Questions List -->
+      <div id="questionsContainer" class="flex flex-col gap-6">
+        <!-- Questions will be rendered here -->
+      </div>
+      <!-- Add Question Button -->
+      <div class="flex justify-center">
+        <button id="addQuestionBtn" class="survey-btn-pro flex items-center gap-2 px-6 py-2 rounded-lg bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 transition">
+          <i data-lucide="plus"></i> Add Question
+        </button>
+      </div>
+    </div>
+  </div>
+  <script>
+    lucide.createIcons();
+
+    // Dropdown logic for Features
+    const btn = document.getElementById('featuresBtn');
+    const dropdown = document.getElementById('featuresDropdown');
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      dropdown.classList.toggle('opacity-0');
+      dropdown.classList.toggle('pointer-events-none');
+    });
+    document.addEventListener('click', function(e) {
+      if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.classList.add('opacity-0', 'pointer-events-none');
+      }
+    });
+
+    // Question Types
+    const QUESTION_TYPES = [
+      { type: 'mcq', label: 'Multiple Choice', icon: 'radio' },
+      { type: 'checkbox', label: 'Checkbox', icon: 'check-square' },
+      { type: 'text', label: 'Text Input', icon: 'type' },
+      { type: 'textarea', label: 'Long Text', icon: 'align-left' },
+      { type: 'rating', label: 'Rating Scale', icon: 'star' },
+      { type: 'likert', label: 'Likert Scale', icon: 'bar-chart-2' },
+      { type: 'date', label: 'Date Picker', icon: 'calendar' }
+      // Removed Image Choice
+    ];
+
+    // Initial questions array
+    let questions = [
+      {
+        type: 'mcq',
+        text: 'How satisfied are you with our service?',
+        required: true,
+        options: [
+          'Very Satisfied',
+          'Satisfied',
+          'Neutral',
+          'Dissatisfied',
+          'Very Dissatisfied'
+        ]
+      }
+    ];
+    let activeQuestionIndex = 0;
+
+    // Render all questions
+    function renderQuestions() {
+      const container = document.getElementById('questionsContainer');
+      container.innerHTML = '';
+      questions.forEach((q, idx) => {
+        const isActive = idx === activeQuestionIndex;
+        const qType = QUESTION_TYPES.find(t => t.type === q.type);
+        let optionsHtml = '';
+        if (q.type === 'mcq' || q.type === 'checkbox' || q.type === 'image') {
+          optionsHtml = `
+            <div id="optionsList${idx}" class="space-y-2 mb-2">
+              ${q.options.map((opt, oidx) => `
+                <div class="flex items-center gap-2">
+                  <input type="${q.type === 'mcq' ? 'radio' : q.type === 'checkbox' ? 'checkbox' : 'radio'}" name="q${idx}" class="accent-blue-500" disabled>
+                  <input class="option-input bg-transparent focus:outline-none flex-1" value="${opt.replace(/"/g, '&quot;')}" data-qidx="${idx}" data-oidx="${oidx}" ${isActive ? '' : 'readonly'}>
+                  ${isActive ? `<button class="remove-option text-gray-400 hover:text-red-500" title="Remove Option" tabindex="-1" data-qidx="${idx}" data-oidx="${oidx}">&times;</button>` : ''}
+                </div>
+              `).join('')}
+            </div>
+            ${isActive ? `<div class="pl-7"><button class="addOptionBtn text-blue-600 text-sm hover:underline" data-qidx="${idx}">+ Add Option</button></div>` : ''}
+          `;
+        }
+        if (q.type === 'likert') {
+          optionsHtml = `
+            <div class="overflow-x-auto mb-2">
+              <table class="likert-table">
+                <thead>
+                  <tr>
+                    <th class="text-left pr-4 bg-white"></th>
+                    ${['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'].map(l => `<th>${l}</th>`).join('')}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="pr-4">
+                      <input class="option-input bg-transparent focus:outline-none" value="${q.likertStatement || 'Statement'}" data-qidx="${idx}" data-likert="1" ${isActive ? '' : 'readonly'}>
+                    </td>
+                    ${[1,2,3,4,5].map(i => `<td><input type="radio" disabled></td>`).join('')}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          `;
+        }
+        if (q.type === 'rating') {
+          optionsHtml = `
+            <div class="flex items-center gap-1 mb-2">
+              ${[1,2,3,4,5].map(i => `<svg data-lucide="star" class="w-6 h-6 text-yellow-400" fill="none"></svg>`).join('')}
+            </div>
+          `;
+        }
+        if (q.type === 'date') {
+          optionsHtml = `
+            <div class="mb-2">
+              <input type="date" class="border rounded px-3 py-1 text-slate-700 bg-white" disabled>
+            </div>
+          `;
+        }
+        if (q.type === 'text') {
+          optionsHtml = `
+            <div class="mb-2">
+              <input type="text" class="border rounded px-3 py-1 text-slate-700 bg-white w-full" placeholder="Your answer..." disabled>
+            </div>
+          `;
+        }
+        if (q.type === 'textarea') {
+          optionsHtml = `
+            <div class="mb-2">
+              <textarea class="border rounded px-3 py-1 text-slate-700 bg-white w-full" rows="3" placeholder="Your answer..." disabled></textarea>
+            </div>
+          `;
+        }
+
+        container.innerHTML += `
+          <div class="question-card-pro p-6 relative group" data-qidx="${idx}">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold">${idx+1}</span>
+              <span class="bg-blue-50 text-blue-600 rounded px-2 py-1 text-xs flex items-center gap-1"><i data-lucide="${qType.icon}"></i> ${qType.label}</span>
+              <input
+                class="ml-2 font-medium text-slate-800 bg-transparent focus:outline-none w-full questionText"
+                value="${q.text.replace(/"/g, '&quot;')}"
+                data-qidx="${idx}"
+                ${isActive ? '' : 'readonly'}
+              />
+              <span class="text-red-500">${q.required ? '*' : ''}</span>
+              ${isActive ? `
+                <button class="delete-question ml-2 text-gray-400 hover:text-red-500" title="Delete Question" data-qidx="${idx}"><i data-lucide="trash-2"></i></button>
+              ` : ''}
+            </div>
+            ${optionsHtml}
+            <div class="flex items-center justify-between mt-4">
+              <label class="flex items-center gap-2 text-sm text-blue-600">
+                <input type="checkbox" class="requiredCheckbox accent-blue-500" data-qidx="${idx}" ${q.required ? 'checked' : ''} ${isActive ? '' : 'disabled'}>
+                Required
+              </label>
+              <div class="flex items-center gap-4">
+                ${isActive ? `<button class="logicBtn text-gray-400 hover:text-blue-600 flex items-center gap-1" data-qidx="${idx}"><i data-lucide="settings"></i> Logic</button>` : ''}
+              </div>
+            </div>
+            ${!isActive ? `<button class="absolute top-2 right-2 text-xs text-blue-500 hover:underline focus:outline-none focus:ring" data-action="edit" data-qidx="${idx}">Edit</button>` : ''}
+          </div>
+        `;
+      });
+      lucide.createIcons();
+    }
+    renderQuestions();
+
+    // Question Type Buttons
+    document.querySelectorAll('.sidebar-pro .space-y-2 > li').forEach((li, idx, arr) => {
+      li.addEventListener('click', function() {
+        arr.forEach(l => l.classList.remove('active', 'text-blue-600', 'font-medium'));
+        li.classList.add('active', 'text-blue-600', 'font-medium');
+        // Add new question of this type and set as active
+        questions.push({
+          type: QUESTION_TYPES[idx].type,
+          text: QUESTION_TYPES[idx].label + ' question',
+          required: false,
+          options: (['mcq','checkbox','image'].includes(QUESTION_TYPES[idx].type)) ? ['Option 1','Option 2'] : undefined,
+          likertStatement: QUESTION_TYPES[idx].type === 'likert' ? 'Statement' : undefined
+        });
+        activeQuestionIndex = questions.length - 1;
+        renderQuestions();
+      });
+    });
+
+    // Add Option, Remove Option, Delete Question, Edit, Logic
+    document.addEventListener('click', function(e) {
+      // Add Option
+      if (e.target.classList.contains('addOptionBtn')) {
+        const qidx = +e.target.dataset.qidx;
+        questions[qidx].options.push('New Option');
+        renderQuestions();
+        return;
+      }
+      // Remove Option
+      if (e.target.classList.contains('remove-option')) {
+        const qidx = +e.target.dataset.qidx;
+        const oidx = +e.target.dataset.oidx;
+        questions[qidx].options.splice(oidx, 1);
+        renderQuestions();
+        return;
+      }
+      // Delete Question (fix: handle SVG icon click inside button)
+      if (
+        e.target.classList.contains('delete-question') ||
+        (e.target.closest('.delete-question'))
+      ) {
+        let btn = e.target.classList.contains('delete-question')
+          ? e.target
+          : e.target.closest('.delete-question');
+        const qidx = +btn.dataset.qidx;
+        questions.splice(qidx, 1);
+        if (activeQuestionIndex >= questions.length) activeQuestionIndex = questions.length - 1;
+        renderQuestions();
+        return;
+      }
+      // Delete via Edit button if delete is visible
+      if (
+        e.target.dataset.action === 'edit' &&
+        e.target.closest('.question-card-pro').querySelector('.delete-question')
+      ) {
+        const qidx = +e.target.dataset.qidx;
+        questions.splice(qidx, 1);
+        if (activeQuestionIndex >= questions.length) activeQuestionIndex = questions.length - 1;
+        renderQuestions();
+        return;
+      }
+      // Edit Question (only if delete is not visible)
+      if (
+        e.target.dataset.action === 'edit' &&
+        !e.target.closest('.question-card-pro').querySelector('.delete-question')
+      ) {
+        activeQuestionIndex = +e.target.dataset.qidx;
+        renderQuestions();
+        return;
+      }
+      // Logic Button
+      if (e.target.classList.contains('logicBtn')) {
+        alert('Logic settings can be implemented here.');
+        return;
+      }
+    });
+
+    // Edit question text
+    document.addEventListener('input', function(e) {
+      if (e.target.classList.contains('questionText')) {
+        const qidx = +e.target.dataset.qidx;
+        questions[qidx].text = e.target.value;
+      }
+      if (e.target.classList.contains('option-input')) {
+        const qidx = +e.target.dataset.qidx;
+        const oidx = +e.target.dataset.oidx;
+        if (typeof oidx !== 'undefined' && questions[qidx].options) {
+          questions[qidx].options[oidx] = e.target.value;
+        }
+        if (e.target.dataset.likert === '1') {
+          questions[qidx].likertStatement = e.target.value;
+        }
+      }
+    });
+
+    // Required checkbox
+    document.addEventListener('change', function(e) {
+      if (e.target.classList.contains('requiredCheckbox')) {
+        const qidx = +e.target.dataset.qidx;
+        questions[qidx].required = e.target.checked;
+      }
+    });
+
+    // Add Question Button
+    document.getElementById('addQuestionBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      // Add a new question of the same type as the last active question
+      const lastType = questions[activeQuestionIndex]?.type || 'mcq';
+      let newQ = {
+        type: lastType,
+        text: QUESTION_TYPES.find(t=>t.type===lastType)?.label + ' question',
+        required: false,
+        options: (['mcq','checkbox','image'].includes(lastType)) ? ['Option 1','Option 2'] : undefined,
+        likertStatement: lastType === 'likert' ? 'Statement' : undefined
+      };
+      questions.push(newQ);
+      activeQuestionIndex = questions.length - 1;
+      renderQuestions();
+    });
+
+    // Preview Button
+    document.getElementById('previewBtn').addEventListener('click', function() {
+      // Create a modal overlay
+      let modal = document.createElement('div');
+      modal.id = 'previewModal';
+      modal.style.position = 'fixed';
+      modal.style.top = 0;
+      modal.style.left = 0;
+      modal.style.width = '100vw';
+      modal.style.height = '100vh';
+      modal.style.background = 'rgba(30,41,59,0.25)';
+      modal.style.zIndex = 1000;
+      modal.style.display = 'flex';
+      modal.style.alignItems = 'center';
+      modal.style.justifyContent = 'center';
+
+      // Modal content
+      let content = document.createElement('div');
+      content.style.background = 'white';
+      content.style.borderRadius = '1.25rem';
+      content.style.boxShadow = '0 8px 32px 0 rgba(56,189,248,0.13), 0 2px 8px 0 rgba(80,120,255,0.07)';
+      content.style.maxWidth = '600px';
+      content.style.width = '95vw';
+      content.style.maxHeight = '90vh';
+      content.style.overflowY = 'auto';
+      content.style.padding = '2rem 1.5rem 1.5rem 1.5rem';
+      content.style.position = 'relative';
+
+      // Close button
+      let closeBtn = document.createElement('button');
+      closeBtn.innerHTML = '<svg data-lucide="x" class="w-6 h-6"></svg>';
+      closeBtn.style.position = 'absolute';
+      closeBtn.style.top = '1rem';
+      closeBtn.style.right = '1rem';
+      closeBtn.style.background = 'none';
+      closeBtn.style.border = 'none';
+      closeBtn.style.cursor = 'pointer';
+      closeBtn.style.color = '#64748b';
+      closeBtn.setAttribute('aria-label', 'Close preview');
+      closeBtn.addEventListener('click', function() {
+        document.body.removeChild(modal);
+      });
+
+      // Survey title and description
+      let title = document.createElement('div');
+      title.innerHTML = `
+        <div class="text-2xl font-bold mb-1">${document.getElementById('surveyTitle').value}</div>
+        <div class="text-slate-500 mb-4">${document.getElementById('surveyDesc').value}</div>
+      `;
+
+      // Questions preview
+      let questionsHtml = questions.map((q, idx) => {
+        let qHtml = `<div class="mb-6">
+          <div class="font-medium text-slate-800 mb-2">${idx+1}. ${q.text} ${q.required ? '<span class="text-red-500">*</span>' : ''}</div>`;
+        if (q.type === 'mcq') {
+          qHtml += q.options.map(opt =>
+            `<label class="flex items-center gap-2 mb-1">
+              <input type="radio" name="preview_q${idx}" class="accent-blue-500" disabled>
+              <span>${opt}</span>
+            </label>`
+          ).join('');
+        }
+        if (q.type === 'checkbox') {
+          qHtml += q.options.map(opt =>
+            `<label class="flex items-center gap-2 mb-1">
+              <input type="checkbox" name="preview_q${idx}" class="accent-blue-500" disabled>
+              <span>${opt}</span>
+            </label>`
+          ).join('');
+        }
+        if (q.type === 'text') {
+          qHtml += `<input type="text" class="border rounded px-3 py-1 text-slate-700 bg-white w-full" placeholder="Your answer..." disabled>`;
+        }
+        if (q.type === 'textarea') {
+          qHtml += `<textarea class="border rounded px-3 py-1 text-slate-700 bg-white w-full" rows="3" placeholder="Your answer..." disabled></textarea>`;
+        }
+        if (q.type === 'rating') {
+          qHtml += `<div class="flex items-center gap-1 mb-2">
+            ${[1,2,3,4,5].map(i => `<svg data-lucide="star" class="w-6 h-6 text-yellow-400" fill="none"></svg>`).join('')}
+          </div>`;
+        }
+        if (q.type === 'likert') {
+          qHtml += `
+            <div class="overflow-x-auto mb-2">
+              <table class="likert-table w-full">
+                <thead>
+                  <tr>
+                    <th class="text-left pr-4 bg-white"></th>
+                    ${['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'].map(l => `<th>${l}</th>`).join('')}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="pr-4">${q.likertStatement || 'Statement'}</td>
+                    ${[1,2,3,4,5].map(i => `<td><input type="radio" disabled></td>`).join('')}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          `;
+        }
+        if (q.type === 'date') {
+          qHtml += `<input type="date" class="border rounded px-3 py-1 text-slate-700 bg-white" disabled>`;
+        }
+        qHtml += `</div>`;
+        return qHtml;
+      }).join('');
+
+      content.appendChild(closeBtn);
+      content.appendChild(title);
+      let qWrap = document.createElement('div');
+      qWrap.innerHTML = questionsHtml;
+      content.appendChild(qWrap);
+
+      modal.appendChild(content);
+      document.body.appendChild(modal);
+      lucide.createIcons();
+    });
+
+    // Save Button
+    // Function to save survey to localStorage
+    async function saveSurvey(isPublished = false) {
+      const surveyTitle = document.getElementById('surveyTitle').value;
+      const surveyDesc = document.getElementById('surveyDesc').value;
+
+      if (!surveyTitle) {
+        alert('Please enter a survey title');
+        return false;
+      }
+
+      const surveyData = {
+        id: Date.now().toString(),
+        title: surveyTitle,
+        description: surveyDesc || 'No description provided',
+        questions: questions.map(q => ({
+          questionText: q.text,
+          questionType: q.type === 'mcq' ? 'multiple-choice' : q.type,
+          options: q.options || []
+        })),
+        createdAt: new Date().toISOString(),
+        status: isPublished ? 'published' : 'draft',
+        responses: 0,
+        responseGoal: 100,
+        expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        createdBy: 'You'
+      };
+
+      try {
+        // Save to localStorage
+        const existingSurveys = JSON.parse(localStorage.getItem('surveys') || '[]');
+        existingSurveys.push(surveyData);
+        localStorage.setItem('surveys', JSON.stringify(existingSurveys));
+        
+        // Try to save to backend if available
+        try {
+          const response = await fetch('http://localhost:4000/api/surveys', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(surveyData)
+          });
+          
+          if (!response.ok) {
+            const result = await response.json();
+            console.warn('Backend save failed, but saved to localStorage:', result.error);
+          }
+        } catch (backendError) {
+          console.warn('Could not connect to backend, but saved to localStorage', backendError);
+        }
+        
+        // Show success message
+        alert(`Survey ${isPublished ? 'published' : 'saved'} successfully!`);
+        
+        // If published, redirect to view-survey page
+        if (isPublished) {
+          window.location.href = 'view-survey.html';
+        } else {
+          window.location.reload();
+        }
+        return true;
+      } catch (error) {
+        console.error('Failed to save survey:', error);
+        alert('An error occurred while saving the survey. Please check the console for details.');
+        return false;
+      }
+    }
+
+    // Save and Publish buttons click handler
+    document.getElementById('saveBtn').addEventListener('click', function() {
+      saveSurvey(false);
+    });
+
+
+    // Survey title/desc
+    document.getElementById('surveyTitle').addEventListener('input', function(e) {
+      // You can store this in a variable if needed
+    });
+    document.getElementById('surveyDesc').addEventListener('input', function(e) {
+      // You can store this in a variable if needed
+    });
+  </script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,350 @@
+<!-- Professional Login Form with Light Color Scheme -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login / Sign Up – SmartSurvey</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f8fafc;
+      min-height: 100vh;
+    }
+    .glass {
+      background: rgba(255,255,255,0.85);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.10);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+    .input-icon {
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 1.25rem;
+      width: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .input-icon i, .input-icon svg {
+      height: 1.25rem !important;
+      width: 1.25rem !important;
+      stroke-width: 2.2;
+    }
+    .transition-form {
+      transition: opacity 0.4s cubic-bezier(.4,0,.2,1), transform 0.4s cubic-bezier(.4,0,.2,1);
+    }
+    .hidden-form {
+      opacity: 0;
+      pointer-events: none;
+      position: absolute;
+      left: 0; right: 0; top: 0;
+      transform: translateY(32px);
+    }
+    .visible-form {
+      opacity: 1;
+      pointer-events: auto;
+      position: static;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body class="bg-[#f8fafc] flex flex-col min-h-screen">
+  <!-- Navbar from index.html -->
+  <nav class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-100 w-full">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 flex items-center justify-between h-16">
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="flex items-center gap-3">
+          <svg width="32" height="32" fill="none" viewBox="0 0 48 48">
+            <rect x="4" y="8" width="40" height="32" rx="8" fill="#38bdf8"/>
+            <rect x="12" y="16" width="24" height="16" rx="4" fill="#34d399"/>
+          </svg>
+          <span class="font-semibold text-lg tracking-tight text-slate-800">SmartSurvey</span>
+        </a>
+      </div>
+      <div class="hidden md:flex gap-8 text-sm font-medium">
+        <div class="relative group">
+          <button id="featuresBtn" type="button" class="text-gray-600 hover:text-blue-600 transition font-medium flex items-center gap-1 focus:outline-none">
+            Features
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div id="featuresDropdown" class="absolute left-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-30 flex">
+            <div class="flex flex-col w-full">
+              <a href="survey-creation.html" class="block px-5 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">Survey Creation</a>
+              <a href="distribution.html" class="block px-5 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">Distribution & Sharing</a>
+              <a href="survey-analytics.html" class="block px-5 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">Response Collection</a>
+            </div>
+          </div>
+        </div>
+        <a href="index.html#how" class="hover:text-sky-500 transition-colors">How it Works</a>
+        <a href="view-survey.html" class="hover:text-sky-500 transition-colors">View Surveys</a>
+        <a href="survey-analytics.html" class="hover:text-sky-500 transition-colors">Response Collection</a>
+        <a href="index.html#contact" class="hover:text-sky-500 transition-colors">Contact</a>
+      </div>
+      <div class="flex gap-2">
+        <a href="login.html" id="login-button" class="rounded-lg px-4 py-2 font-medium hover:bg-sky-50 text-sky-600 transition-colors">Login</a>
+        <a href="login.html" id="signup-button" class="rounded-lg px-4 py-2 font-medium bg-sky-500 text-white shadow hover:bg-sky-600 transition-colors">Sign Up</a>
+        <button id="logout-button" class="rounded-lg px-4 py-2 font-medium bg-red-500 text-white shadow hover:bg-red-600 transition-colors" style="display:none;">Logout</button>
+      </div>
+    </div>
+  </nav>
+  <main class="flex-grow flex items-center justify-center p-4">
+    <div class="w-full max-w-md p-8 glass transition-all duration-300 rounded-2xl">
+    <!-- Welcome Message -->
+    <div id="welcomeMessage" class="text-center text-xl font-semibold text-blue-700 mb-6 hidden"></div>
+    <!-- Logout Button (hidden by default) -->
+    <button id="logoutBtn"
+      class="w-full py-2 mb-6 rounded-lg bg-red-600 text-white font-semibold shadow-md hover:bg-red-700 transition-all duration-150 focus:ring-2 focus:ring-red-300 hidden">
+      Logout
+    </button>
+    <div id="authFormsContainer">
+      <!-- Login Form -->
+      <form id="loginForm" class="space-y-6 transition-form visible-form" autocomplete="off">
+      <h2 class="text-3xl font-bold text-center mb-6 text-blue-700">Sign In</h2>
+      <div class="relative">
+        <span class="absolute input-icon text-gray-400"><i data-lucide="mail"></i></span>
+        <input type="email" name="email" required placeholder="Email address"
+          class="pl-10 pr-4 py-2 rounded-lg border border-gray-200 w-full bg-white/70 focus:bg-white transition duration-200"/>
+      </div>
+      <div class="relative">
+        <span class="absolute input-icon text-gray-400"><i data-lucide="lock"></i></span>
+        <input type="password" name="password" required placeholder="Password"
+          class="pl-10 pr-4 py-2 rounded-lg border border-gray-200 w-full bg-white/70 focus:bg-white transition duration-200"/>
+      </div>
+      <div class="flex justify-between items-center">
+        <label class="flex items-center text-sm text-gray-500">
+          <input type="checkbox" class="mr-2 rounded border-gray-300">
+          Remember me
+        </label>
+        <a href="#" class="text-sm text-blue-500 hover:underline transition">Forgot password?</a>
+      </div>
+      <button type="submit"
+        class="w-full py-2 rounded-lg bg-blue-600 text-white font-semibold shadow-md hover:bg-blue-700 active:scale-95 transition-all duration-150 focus:ring-2 focus:ring-blue-300">
+        Sign In
+      </button>
+      <div class="text-center mt-4 text-sm text-gray-600">
+        Don't have an account?
+        <a href="#" onclick="showSignup(); return false;" class="text-blue-600 hover:underline font-medium transition">Sign up</a>
+      </div>
+    </form>
+    <!-- Signup Form -->
+    <form id="signupForm" class="space-y-6 transition-form hidden-form" autocomplete="off">
+      <h2 class="text-3xl font-bold text-center mb-6 text-blue-700">Sign Up</h2>
+      <div class="relative">
+        <span class="absolute input-icon text-gray-400"><i data-lucide="user"></i></span>
+        <input type="text" name="name" required placeholder="Full Name"
+          class="pl-10 pr-4 py-2 rounded-lg border border-gray-200 w-full bg-white/70 focus:bg-white transition duration-200"/>
+      </div>
+      <!-- Account Type Tiles -->
+      <div>
+        <label class="block text-slate-700 mb-2 font-medium">Account Type</label>
+        <div class="flex gap-4 justify-center flex-wrap">
+          <button type="button" id="tile-user" class="role-tile flex-1 min-w-[120px] max-w-[160px] px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-medium shadow-sm hover:border-sky-400 focus:outline-none transition active"
+            data-role="user">
+            <svg data-lucide="user" class="w-6 h-6 mx-auto mb-1 text-sky-500"></svg>
+            User
+          </button>
+          <button type="button" id="tile-admin" class="role-tile flex-1 min-w-[120px] max-w-[160px] px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-medium shadow-sm hover:border-sky-400 focus:outline-none transition"
+            data-role="admin">
+            <svg data-lucide="shield" class="w-6 h-6 mx-auto mb-1 text-purple-500"></svg>
+            Admin
+          </button>
+        </div>
+        <input type="hidden" id="role" name="role" value="user" required>
+      </div>
+      <div class="relative">
+        <span class="absolute input-icon text-gray-400"><i data-lucide="mail"></i></span>
+        <input type="email" name="email" required placeholder="Email address"
+          class="pl-10 pr-4 py-2 rounded-lg border border-gray-200 w-full bg-white/70 focus:bg-white transition duration-200"/>
+      </div>
+      <div class="relative">
+        <span class="absolute input-icon text-gray-400"><i data-lucide="lock"></i></span>
+        <input type="password" name="password" required placeholder="Password"
+          class="pl-10 pr-4 py-2 rounded-lg border border-gray-200 w-full bg-white/70 focus:bg-white transition duration-200"/>
+      </div>
+      <div class="relative">
+        <span class="absolute input-icon text-gray-400"><i data-lucide="lock"></i></span>
+        <input type="password" name="confirm" required placeholder="Confirm Password"
+          class="pl-10 pr-4 py-2 rounded-lg border border-gray-200 w-full bg-white/70 focus:bg-white transition duration-200"/>
+      </div>
+      <button type="submit"
+        class="w-full py-2 rounded-lg bg-blue-600 text-white font-semibold shadow-md hover:bg-blue-700 active:scale-95 transition-all duration-150 focus:ring-2 focus:ring-blue-300">
+        Sign Up
+      </button>
+      <div class="text-center mt-4 text-sm text-gray-600">
+        Already have an account?
+        <a href="#" onclick="showLogin(); return false;" class="text-blue-600 hover:underline font-medium transition">Sign in</a>
+      </div>
+    </form>
+    </div>
+      </div>
+  </main>
+  <script>
+document.addEventListener('DOMContentLoaded', function () {
+  lucide.createIcons();
+
+  // Navbar dropdown logic
+  const btn = document.getElementById('featuresBtn');
+  const dropdown = document.getElementById('featuresDropdown');
+  if (btn && dropdown) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      dropdown.classList.toggle('opacity-0');
+      dropdown.classList.toggle('pointer-events-none');
+    });
+    document.addEventListener('click', function(e) {
+      if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.classList.add('opacity-0', 'pointer-events-none');
+      }
+    });
+
+    // Restrict access to admin-only features
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const adminOnlyLinks = dropdown.querySelectorAll('.admin-only');
+    adminOnlyLinks.forEach(link => {
+      if (user.role !== 'admin') {
+        link.classList.add('opacity-50', 'cursor-not-allowed');
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          alert('This feature is available only to administrators.');
+        });
+      }
+    });
+  }
+
+  // Role tile selection
+  const roleInput = document.getElementById('role');
+  const userTile = document.getElementById('tile-user');
+  const adminTile = document.getElementById('tile-admin');
+
+  function selectRole(role) {
+    roleInput.value = role;
+    if (role === 'user') {
+      userTile.classList.add('border-sky-500', 'bg-sky-50', 'active');
+      userTile.classList.remove('border-slate-200', 'bg-slate-50');
+      adminTile.classList.remove('border-sky-500', 'bg-sky-50', 'active');
+      adminTile.classList.add('border-slate-200', 'bg-slate-50');
+    } else {
+      adminTile.classList.add('border-sky-500', 'bg-sky-50', 'active');
+      adminTile.classList.remove('border-slate-200', 'bg-slate-50');
+      userTile.classList.remove('border-sky-500', 'bg-sky-50', 'active');
+      userTile.classList.add('border-slate-200', 'bg-slate-50');
+    }
+  }
+
+  if (userTile && adminTile) {
+    userTile.addEventListener('click', () => selectRole('user'));
+    adminTile.addEventListener('click', () => selectRole('admin'));
+    selectRole('user');
+  }
+
+  // Form toggles
+  window.showSignup = function() {
+    document.getElementById('loginForm').classList.remove('visible-form');
+    document.getElementById('loginForm').classList.add('hidden-form');
+    document.getElementById('signupForm').classList.remove('hidden-form');
+    document.getElementById('signupForm').classList.add('visible-form');
+    lucide.createIcons();
+  };
+
+  window.showLogin = function() {
+    document.getElementById('signupForm').classList.remove('visible-form');
+    document.getElementById('signupForm').classList.add('hidden-form');
+    document.getElementById('loginForm').classList.remove('hidden-form');
+    document.getElementById('loginForm').classList.add('visible-form');
+    lucide.createIcons();
+  };
+
+  // Show/hide forms and welcome/logout based on login state
+  window.updateAuthUI = function() {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const welcomeDiv = document.getElementById('welcomeMessage');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const authFormsContainer = document.getElementById('authFormsContainer');
+
+    if (user && user.name) {
+      welcomeDiv.textContent = `Welcome, ${user.name}!`;
+      welcomeDiv.classList.remove('hidden');
+      logoutBtn.classList.remove('hidden');
+      authFormsContainer.classList.add('hidden');
+    } else {
+      welcomeDiv.classList.add('hidden');
+      logoutBtn.classList.add('hidden');
+      authFormsContainer.classList.remove('hidden');
+      showLogin(); // Ensure login form is shown by default if not logged in
+    }
+  };
+
+  updateAuthUI();
+
+  document.getElementById('logoutBtn').addEventListener('click', function() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    updateAuthUI();
+  });
+
+  document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const email = this.elements.email.value;
+    const password = this.elements.password.value;
+    try {
+      const res = await fetch('http://localhost:4000/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        updateAuthUI();
+      } else {
+        alert(data.error || 'Login failed');
+      }
+    } catch (err) {
+      alert('An error occurred.');
+    }
+  });
+
+  document.getElementById('signupForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const name = this.elements.name.value;
+    const email = this.elements.email.value;
+    const password = this.elements.password.value;
+    const confirm = this.elements.confirm.value;
+    const role = this.elements.role.value;
+
+    if (password !== confirm) {
+      return alert('Passwords do not match');
+    }
+
+    try {
+      const res = await fetch('http://localhost:4000/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, role }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert('Signup successful! Please log in.');
+        showLogin();
+      } else {
+        alert(data.error || 'Signup failed');
+      }
+    } catch (err) {
+      alert('An error occurred.');
+    }
+  });
+});
+  </script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

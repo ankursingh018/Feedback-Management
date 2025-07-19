@@ -1,0 +1,1155 @@
+<!-- Professional Distribution & Sharing Page -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Survey Distribution - SmartSurvey</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+    }
+    /* Generic active styles for text and icons */
+    .sidebar-link.active {
+      color: white;
+    }
+    .sidebar-link.active p,
+    .sidebar-link.active i {
+        color: white;
+    }
+
+    /* Color-specific background for active links */
+    .sidebar-link[data-target="qrcode-content"].active { background-color: #10b981; } /* emerald-500 */
+    .sidebar-link[data-target="link-content"].active { background-color: #f59e0b; } /* amber-500 */
+
+    .form-input {
+        border-radius: 0.5rem;
+        border: 1px solid #e5e7eb;
+        padding: 0.75rem 1rem;
+        width: 100%;
+        transition: all 0.2s ease;
+    }
+    .form-input:focus {
+        outline: none;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+  <!-- Sticky Navigation from index.html -->
+  <nav class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 flex items-center justify-between h-16">
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="flex items-center gap-3">
+          <svg width="32" height="32" fill="none" viewBox="0 0 48 48">
+            <rect x="4" y="8" width="40" height="32" rx="8" fill="#38bdf8"/>
+            <rect x="12" y="16" width="24" height="16" rx="4" fill="#34d399"/>
+          </svg>
+          <span class="font-semibold text-lg tracking-tight text-slate-800">SmartSurvey</span>
+        </a>
+      </div>
+      <div class="hidden md:flex gap-8 text-sm font-medium">
+        <div class="relative group">
+          <button id="featuresBtn" type="button" class="text-gray-600 hover:text-blue-600 transition font-medium flex items-center gap-1 focus:outline-none">
+            Features
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div id="featuresDropdown" class="absolute left-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-30 flex">
+            <div class="flex flex-col w-full">
+              <a href="survey-creation.html" class="block px-5 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">Survey Creation</a>
+              <a href="distribution.html" class="block px-5 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">Distribution & Sharing</a>
+              <a href="survey-analytics.html" class="block px-5 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">Response Collection</a>
+            </div>
+          </div>
+        </div>
+        <a href="index.html#how" class="hover:text-sky-500 transition-colors">How it Works</a>
+        <a href="view-survey.html" class="hover:text-sky-500 transition-colors">View Surveys</a>
+        <a href="survey-analytics.html" class="hover:text-sky-500 transition-colors">Response Collection</a>
+        <a href="index.html#contact" class="hover:text-sky-500 transition-colors">Contact</a>
+      </div>
+      <div class="flex gap-2">
+        <a href="login.html" id="login-button" class="rounded-lg px-4 py-2 font-medium hover:bg-sky-50 text-sky-600 transition-colors">Login</a>
+        <a href="login.html" id="signup-button" class="rounded-lg px-4 py-2 font-medium bg-sky-500 text-white shadow hover:bg-sky-600 transition-colors">Sign Up</a>
+        <button id="logout-button" class="rounded-lg px-4 py-2 font-medium bg-red-500 text-white shadow hover:bg-red-600 transition-colors" style="display:none;">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="flex flex-grow bg-white">
+    <!-- Sidebar -->
+    <aside class="w-80 bg-white border-r border-gray-200 p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">Distribution Methods</h2>
+      <nav id="dist-methods" class="space-y-2">
+        <a href="#qrcode" data-target="qrcode-content" class="sidebar-link active flex items-center gap-3 p-3 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">
+          <i data-lucide="qr-code" class="w-5 h-5 text-gray-500"></i>
+          <div>
+            <p class="font-medium text-gray-900">QR Code</p>
+            <p class="text-sm text-gray-500">Generate QR codes for easy access</p>
+          </div>
+        </a>
+        <a href="#link" data-target="link-content" class="sidebar-link flex items-center gap-3 p-3 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">
+          <i data-lucide="link" class="w-5 h-5 text-gray-500"></i>
+          <div>
+            <p class="font-medium text-gray-900">Public Link</p>
+            <p class="text-sm text-gray-500">Share a public link to your survey</p>
+          </div>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col">
+      <header class="bg-white border-b border-gray-200 px-8 py-4">
+        <div class="flex justify-between items-center">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">Survey Distribution</h1>
+            <p class="text-gray-500 mt-1">Choose how to share your survey with respondents</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
+              <i data-lucide="settings-2" class="w-4 h-4"></i>
+              Settings
+            </button>
+            <button id="sendSurveyBtn" class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm">
+              <i data-lucide="send" class="w-4 h-4"></i>
+              Send Survey
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div id="content-panels" class="flex-1 p-8 overflow-y-auto">
+        <!-- QR Code Content -->
+        <div id="qrcode-content" class="dist-content bg-white p-8 rounded-xl border border-gray-200">
+          <h2 class="text-xl font-semibold text-gray-900 mb-6">Generate QR Code</h2>
+          
+          <!-- Survey Selection -->
+          <div class="mb-6">
+            <label for="qrcode-survey" class="block text-sm font-medium text-gray-700 mb-2">Select Survey</label>
+            <select id="qrcode-survey" class="form-select w-full">
+              <option value="">-- Select a survey --</option>
+              <!-- Surveys will be populated by JavaScript -->
+            </select>
+          </div>
+          
+          <!-- QR Code Preview -->
+          <div id="qrcode-preview" class="hidden">
+            <div class="flex flex-col md:flex-row gap-8">
+              <!-- QR Code Display -->
+              <div class="flex flex-col items-center">
+                <div id="qrcode" class="bg-white p-4 rounded-lg border border-gray-200 mb-4">
+                  <!-- QR Code will be rendered here -->
+                </div>
+                <div class="flex gap-2 mb-6">
+                  <button id="download-qr-png" class="text-xs px-3 py-1.5 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors flex items-center gap-1">
+                    <i data-lucide="download" class="h-3.5 w-3.5"></i>
+                    Download PNG
+                  </button>
+                  <button id="download-qr-svg" class="text-xs px-3 py-1.5 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors flex items-center gap-1">
+                    <i data-lucide="download" class="h-3.5 w-3.5"></i>
+                    Download SVG
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Customization Options -->
+              <div class="flex-1">
+                <div class="space-y-6">
+                  <div>
+                    <h3 class="text-sm font-medium text-gray-900 mb-3">Customize QR Code</h3>
+                    <div class="space-y-4">
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">QR Code Color</label>
+                        <div class="flex items-center gap-2">
+                          <input type="color" id="qr-color" value="#000000" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
+                          <input type="text" id="qr-color-hex" value="#000000" class="form-input text-sm w-24">
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Background Color</label>
+                        <div class="flex items-center gap-2">
+                          <input type="color" id="qr-bg-color" value="#ffffff" class="h-8 w-8 p-0 border-0 rounded cursor-pointer">
+                          <input type="text" id="qr-bg-color-hex" value="#ffffff" class="form-input text-sm w-24">
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Size: <span id="qr-size-value">200</span>px</label>
+                        <input type="range" id="qr-size" min="100" max="500" value="200" class="w-full">
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="pt-4 border-t border-gray-200">
+                    <h3 class="text-sm font-medium text-gray-900 mb-3">Share</h3>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                      <button id="copy-qr-link" class="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 flex items-center justify-center gap-2">
+                        <i data-lucide="link" class="h-4 w-4"></i>
+                        Copy Link
+                      </button>
+                      <button id="download-qr-png-small" class="flex-1 px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-2">
+                        <i data-lucide="download" class="h-4 w-4"></i>
+                        Download
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Public Link Content -->
+        <div id="link-content" class="dist-content hidden bg-white p-8 rounded-xl border border-gray-200">
+          <h2 class="text-xl font-semibold text-gray-900 mb-6">Share Survey via Public Link</h2>
+          
+          <!-- Survey Selection -->
+          <div class="mb-6">
+            <label for="public-link-survey" class="block text-sm font-medium text-gray-700 mb-2">Select Survey</label>
+            <select id="public-link-survey" class="form-select w-full">
+              <option value="">-- Select a survey --</option>
+              <!-- Surveys will be populated by JavaScript -->
+            </select>
+          </div>
+          
+          <!-- Generated Link -->
+          <div id="public-link-container" class="hidden">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Public Link</label>
+            <div class="flex rounded-md shadow-sm">
+              <input type="text" id="public-link-url" readonly 
+                     class="flex-1 min-w-0 block w-full px-3 py-2 rounded-l-md border border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" 
+                     placeholder="Select a survey to generate link">
+              <button id="copy-public-link" class="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 bg-gray-50 text-gray-700 text-sm font-medium hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+                <i data-lucide="copy" class="h-4 w-4 mr-1"></i>
+                Copy
+              </button>
+            </div>
+            <p class="mt-1 text-sm text-gray-500">Anyone with this link can take the survey</p>
+            
+            <!-- Link Settings -->
+            <div class="mt-6 pt-6 border-t border-gray-200">
+              <h3 class="text-md font-medium text-gray-900 mb-3">Link Settings</h3>
+              <div class="space-y-4">
+                <div class="flex items-center">
+                  <input id="collect-email" name="collect-email" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                  <label for="collect-email" class="ml-2 block text-sm text-gray-700">
+                    Collect email addresses
+                  </label>
+                </div>
+                <div class="flex items-center">
+                  <input id="limit-responses" name="limit-responses" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                  <label for="limit-responses" class="ml-2 block text-sm text-gray-700">
+                    Limit number of responses
+                  </label>
+                </div>
+                <div id="response-limit-container" class="hidden ml-6">
+                  <label for="max-responses" class="block text-sm font-medium text-gray-700 mb-1">Maximum Responses</label>
+                  <input type="number" id="max-responses" min="1" value="100" class="form-input w-32">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Embed Code Content -->
+        <div id="embed-content" class="dist-content hidden bg-white p-8 rounded-xl border border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900">Embed Code</h2>
+            <p class="mt-4 text-gray-600">Embed code settings will be available here.</p>
+            <select id="survey-select">
+              <option value="">Select a survey</option>
+            </select>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    lucide.createIcons();
+
+    // Global variables
+    let sidebarLinks, contentPanels, surveySelect, messageTextarea, sendSurveyBtn;
+
+    // Load surveys from localStorage
+    function loadSurveys() {
+        try {
+          console.log('Loading surveys from localStorage...');
+          const surveysData = localStorage.getItem('surveys');
+          console.log('Raw surveys data:', surveysData);
+          
+          const surveys = surveysData ? JSON.parse(surveysData) : [];
+          console.log('Parsed surveys:', surveys);
+          
+          const surveySelect = document.getElementById('survey-select');
+          if (!surveySelect) {
+            console.error('Survey select element not found');
+            return;
+          }
+          
+          // Clear existing options except the first one
+          while (surveySelect.options.length > 1) {
+            surveySelect.remove(1);
+          }
+
+          if (surveys.length === 0) {
+            console.warn('No surveys found in localStorage');
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'No surveys available. Create one first.';
+            option.disabled = true;
+            surveySelect.appendChild(option);
+            return;
+          }
+
+          // Add surveys to select
+          surveys.forEach(survey => {
+            if (!survey.id || !survey.title) {
+              console.warn('Invalid survey format:', survey);
+              return;
+            }
+            const option = document.createElement('option');
+            option.value = survey.id;
+            option.textContent = survey.title || `Untitled Survey (${survey.id})`;
+            surveySelect.appendChild(option);
+          });
+          
+          console.log(`Loaded ${surveys.length} surveys`);
+        } catch (error) {
+          console.error('Error loading surveys:', error);
+          alert('Error loading surveys. Please check the console for details.');
+        }
+      }
+
+
+      // Function to update survey link when survey is selected
+      function setupSurveyLinkUpdate() {
+        if (!surveySelect) {
+          console.error('Survey select element not found');
+          return;
+        }
+        
+        surveySelect.addEventListener('change', function() {
+          const selectedSurveyId = this.value;
+          if (!selectedSurveyId) return;
+          
+          // Generate survey URL
+          const surveyUrl = `${window.location.origin}/take-survey.html?id=${selectedSurveyId}`;
+          
+          // Update message with survey link if messageTextarea exists
+          if (messageTextarea) {
+            const message = messageTextarea.value;
+            const updatedMessage = message.replace(
+              /\[Survey Link\]|https?:\/\/[^\s]+/g, 
+              surveyUrl
+            );
+            messageTextarea.value = updatedMessage;
+          }
+        });
+      }
+
+      // Function to set up the send survey button
+      function setupSendSurveyButton() {
+        if (!sendSurveyBtn) {
+          console.error('Send survey button not found');
+          return;
+        }
+        
+        sendSurveyBtn.addEventListener('click', async function() {
+          const fromName = document.getElementById('from-name')?.value.trim();
+          const fromEmail = document.getElementById('from-email')?.value.trim();
+          const subject = document.getElementById('subject')?.value.trim();
+          const message = document.getElementById('message')?.value;
+          const recipients = document.getElementById('recipients')?.value;
+          const selectedSurveyId = surveySelect?.value;
+
+          // Validate inputs
+          if (!selectedSurveyId) {
+            alert('Please select a survey first');
+            return;
+          }
+
+          if (!recipients || !recipients.trim()) {
+            alert('Please enter at least one recipient email');
+            return;
+          }
+
+          if (!fromName || !fromEmail) {
+            alert('Please fill in all required sender information');
+            return;
+          }
+
+          // Basic email validation
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(fromEmail)) {
+            alert('Please enter a valid sender email address');
+            return;
+          }
+
+          const recipientEmails = recipients.split('\n')
+          .map(email => email.trim())
+          .filter(email => {
+            if (email && !emailRegex.test(email)) {
+              alert(`Invalid email address: ${email}`);
+              return false;
+            }
+            return email !== '';
+          });
+
+        if (recipientEmails.length === 0) {
+          alert('Please enter at least one valid recipient email');
+          return;
+        }
+
+        // Get survey title for email subject
+        const surveyTitle = surveySelect.options[surveySelect.selectedIndex].text;
+        const finalSubject = subject || `Survey: ${surveyTitle}`;
+
+        // Disable button and show loading state
+        const originalBtnText = sendSurveyBtn.innerHTML;
+        sendSurveyBtn.disabled = true;
+        sendSurveyBtn.innerHTML = `
+          <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Sending...
+        `;
+
+        try {
+          const response = await fetch('http://localhost:4000/api/send-survey-email', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              from: `"${fromName}" <${fromEmail}>`,
+              to: recipientEmails,
+              subject: finalSubject,
+              message: message,
+              surveyId: selectedSurveyId,
+              surveyTitle: surveyTitle
+            }),
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            // Show success message
+            alert(`Survey invitation sent successfully to ${recipientEmails.length} recipient(s)!`);
+            // Clear recipients after successful send
+            document.getElementById('recipients').value = '';
+          } else {
+            throw new Error(result.message || 'Failed to send survey invitations');
+          }
+        } catch (error) {
+          console.error('Error sending survey emails:', error);
+          alert(`Error: ${error.message || 'Failed to send emails. Please try again.'}`);
+        } finally {
+          // Re-enable button and restore original text
+          sendSurveyBtn.disabled = false;
+          sendSurveyBtn.innerHTML = originalBtnText;
+        }
+      });
+      }
+
+      // Initialize public link functionality
+      const publicLinkSurveySelect = document.getElementById('public-link-survey');
+      const publicLinkContainer = document.getElementById('public-link-container');
+      const publicLinkInput = document.getElementById('public-link');
+      const copyLinkBtn = document.getElementById('copy-link-btn');
+      const limitResponsesCheckbox = document.getElementById('limit-responses');
+      const responseLimitContainer = document.getElementById('response-limit-container');
+
+      // Toggle response limit input
+      limitResponsesCheckbox?.addEventListener('change', function() {
+        responseLimitContainer.classList.toggle('hidden', !this.checked);
+      });
+
+      // Copy link to clipboard
+      copyLinkBtn?.addEventListener('click', function() {
+        publicLinkInput.select();
+        document.execCommand('copy');
+        
+        // Show feedback
+        const originalText = copyLinkBtn.innerHTML;
+        copyLinkBtn.innerHTML = `
+          <i data-lucide="check" class="h-4 w-4 mr-1"></i>
+          Copied!
+        `;
+        lucide.createIcons();
+        
+        // Revert after 2 seconds
+        setTimeout(() => {
+          copyLinkBtn.innerHTML = originalText;
+          lucide.createIcons();
+        }, 2000);
+      });
+
+      // Update public link when survey is selected
+      publicLinkSurveySelect?.addEventListener('change', function() {
+        const surveyId = this.value;
+        if (!surveyId) {
+          publicLinkContainer.classList.add('hidden');
+          return;
+        }
+        
+        // Get the selected survey
+        const surveys = JSON.parse(localStorage.getItem('surveys') || '[]');
+        const selectedSurvey = surveys.find(s => s.id === surveyId);
+        
+        if (selectedSurvey) {
+          // Generate public URL
+          const baseUrl = window.location.origin;
+          const publicUrl = `${baseUrl}/take-survey.html?surveyId=${surveyId}`;
+          
+          // Update UI
+          publicLinkInput.value = publicUrl;
+          publicLinkContainer.classList.remove('hidden');
+          
+          // Update response limit if exists
+          const maxResponsesInput = document.getElementById('max-responses');
+          if (maxResponsesInput && selectedSurvey.responseGoal) {
+            maxResponsesInput.value = selectedSurvey.responseGoal;
+          }
+        } else {
+          publicLinkContainer.classList.add('hidden');
+        }
+      });
+
+      // Load surveys into public link dropdown
+      function loadSurveysForPublicLink() {
+        // Get the select element if not already available
+        const selectElement = document.getElementById('public-link-survey');
+        if (!selectElement) {
+          console.error('Public link survey select element not found');
+          return;
+        }
+        
+        try {
+          const surveys = JSON.parse(localStorage.getItem('surveys') || '[]');
+          console.log('Loading surveys for public link:', surveys);
+          
+          // Clear existing options except the first one
+          while (selectElement.options.length > 1) {
+            selectElement.remove(1);
+          }
+
+          // Add surveys to select
+          surveys.forEach(survey => {
+            if (!survey.id) return;
+            
+            const option = document.createElement('option');
+            option.value = survey.id;
+            option.textContent = survey.title || `Untitled Survey (${survey.id})`;
+            selectElement.appendChild(option);
+          });
+          
+          // Update the public link when surveys are loaded
+          updatePublicLink();
+        } catch (error) {
+          console.error('Error loading surveys for public link:', error);
+        }
+      }
+
+      // QR code state
+      let currentQrUrl = '';
+      let currentQrCanvas = null;
+      let qrCodeInstance = null;
+
+      // Generate QR code
+      function generateQRCode(url, color, bgColor, size) {
+        const qrCodeElement = document.getElementById('qrcode');
+        if (!qrCodeElement) return false;
+        
+        // Clear previous QR code
+        qrCodeElement.innerHTML = '';
+        
+        try {
+          // Generate new QR code
+          qrCodeInstance = new QRCode(qrCodeElement, {
+            text: url,
+            width: size,
+            height: size,
+            colorDark: color,
+            colorLight: bgColor,
+            correctLevel: QRCode.CorrectLevel.H
+          });
+          
+          // Store canvas for download
+          currentQrCanvas = qrCodeElement.querySelector('canvas');
+          currentQrUrl = url;
+          return true;
+        } catch (error) {
+          console.error('Error generating QR code:', error);
+          alert('Failed to generate QR code. Please try again.');
+          return false;
+        }
+      }
+
+      // Download QR code
+      function downloadQRCode(format) {
+        if (!currentQrCanvas) {
+          alert('Please generate a QR code first');
+          return;
+        }
+        
+        try {
+          let fileName = 'qrcode';
+          const surveySelect = document.getElementById('qrcode-survey');
+          if (surveySelect && surveySelect.value) {
+            fileName = surveySelect.options[surveySelect.selectedIndex].text
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/^-+|-+$/g, '');
+          }
+          
+          const link = document.createElement('a');
+          
+          if (format === 'png') {
+            link.download = `${fileName}-qrcode.png`;
+            link.href = currentQrCanvas.toDataURL('image/png');
+          } else {
+            // For SVG, we need to create a new one to ensure quality
+            const svgData = `
+              <svg xmlns="http://www.w3.org/2000/svg" width="${currentQrCanvas.width}" height="currentQrCanvas.height">
+                <rect width="100%" height="100%" fill="${document.getElementById('qr-bg-color').value}"/>
+                <image href="${currentQrCanvas.toDataURL('image/png')}" width="100%" height="100%"/>
+              </svg>`;
+            
+            link.download = `${fileName}-qrcode.svg`;
+            link.href = 'data:image/svg+xml,' + encodeURIComponent(svgData);
+          }
+          
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } catch (error) {
+          console.error('Error downloading QR code:', error);
+          alert('Failed to download QR code. Please try again.');
+        }
+      }
+
+      // Copy QR code link to clipboard
+      function copyQRCodeLink() {
+        if (!currentQrUrl) {
+          alert('Please generate a QR code first');
+          return;
+        }
+        
+        navigator.clipboard.writeText(currentQrUrl).then(() => {
+          // Show success message
+          const button = document.getElementById('copy-qr-link');
+          if (button) {
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i data-lucide="check" class="h-4 w-4"></i> Copied!';
+            setTimeout(() => {
+              button.innerHTML = originalText;
+              lucide.createIcons(); // Re-initialize icons
+            }, 2000);
+          }
+        }).catch(err => {
+          console.error('Failed to copy text: ', err);
+          alert('Failed to copy link to clipboard. Please try again.');
+        });
+      }
+
+      // Update QR code with current settings
+      function updateQRCode() {
+        const surveySelect = document.getElementById('qrcode-survey');
+        if (!surveySelect || !surveySelect.value) {
+          document.getElementById('qrcode-preview')?.classList.add('hidden');
+          return;
+        }
+        
+        // Get survey ID and construct URL
+        const surveyId = surveySelect.value;
+        const surveyTitle = surveySelect.options[surveySelect.selectedIndex].text;
+        const baseUrl = window.location.origin + window.location.pathname.replace('distribution.html', '');
+        const surveyUrl = `${baseUrl}survey.html?id=${encodeURIComponent(surveyId)}&title=${encodeURIComponent(surveyTitle)}`;
+        
+        // Get styling options
+        const color = document.getElementById('qr-color').value;
+        const bgColor = document.getElementById('qr-bg-color').value;
+        const size = parseInt(document.getElementById('qr-size').value);
+        
+        // Generate QR code
+        generateQRCode(surveyUrl, color, bgColor, size);
+        document.getElementById('qrcode-preview')?.classList.remove('hidden');
+      }
+      
+      // Initialize QR code functionality
+      function initQRCodeFunctionality() {
+        const qrSurveySelect = document.getElementById('qrcode-survey');
+        const qrPreview = document.getElementById('qrcode-preview');
+        
+        // Load surveys into QR code dropdown
+        function loadSurveysForQRCode() {
+          const qrSurveySelect = document.getElementById('qrcode-survey');
+          if (!qrSurveySelect) {
+            console.error('QR code survey select element not found');
+            return;
+          }
+          
+          try {
+            const surveys = JSON.parse(localStorage.getItem('surveys') || '[]');
+            console.log('Loading surveys for QR code:', surveys);
+            
+            // Clear existing options except the first one
+            while (qrSurveySelect.options.length > 1) {
+              qrSurveySelect.remove(1);
+            }
+
+            // Add surveys to select
+            surveys.forEach(survey => {
+              if (!survey.id) return;
+              
+              const option = document.createElement('option');
+              option.value = survey.id;
+              option.textContent = survey.title || `Untitled Survey (${survey.id})`;
+              qrSurveySelect.appendChild(option);
+            });
+            
+            // If we have surveys, update the QR code
+            if (surveys.length > 0) {
+              updateQRCode();
+            }
+          } catch (error) {
+            console.error('Error loading surveys for QR code:', error);
+          }
+        }
+        
+        // Initialize color pickers and inputs
+        function initColorPickers() {
+          const qrColorInput = document.getElementById('qr-color');
+          const qrColorHex = document.getElementById('qr-color-hex');
+          const qrBgColorInput = document.getElementById('qr-bg-color');
+          const qrBgColorHex = document.getElementById('qr-bg-color-hex');
+          const qrSize = document.getElementById('qr-size');
+          const qrSizeValue = document.getElementById('qr-size-value');
+          
+          // Set initial size value
+          if (qrSize && qrSizeValue) {
+            qrSizeValue.textContent = qrSize.value;
+          }
+          
+          // Add event listeners for color pickers
+          [qrColorInput, qrColorHex, qrBgColorInput, qrBgColorHex, qrSize].forEach(input => {
+            if (input) {
+              input.addEventListener('change', updateQRCode);
+              input.addEventListener('input', updateQRCode);
+            }
+          });
+          
+          // Add event listener for size slider
+          if (qrSize) {
+            qrSize.addEventListener('input', (e) => {
+              if (qrSizeValue) {
+                qrSizeValue.textContent = e.target.value;
+              }
+              updateQRCode();
+            });
+          }
+        }
+        
+        // Handle survey selection
+        if (qrSurveySelect) {
+          qrSurveySelect.addEventListener('change', updateQRCode);
+        }
+        
+        // Initialize download buttons
+        document.getElementById('download-qr-png')?.addEventListener('click', () => downloadQRCode('png'));
+        document.getElementById('download-qr-svg')?.addEventListener('click', () => downloadQRCode('svg'));
+        document.getElementById('copy-qr-link')?.addEventListener('click', copyQRCodeLink);
+        
+        // Initialize surveys and color pickers
+        loadSurveysForQRCode();
+        initColorPickers();
+        
+        // If a survey is already selected, update the QR code
+        if (qrSurveySelect && qrSurveySelect.value) {
+          updateQRCode();
+        }
+      }
+      
+      // Initialize SMS functionality
+      function initSMSFunctionality() {
+        const smsSurveySelect = document.getElementById('sms-survey');
+        const sendSmsBtn = document.getElementById('send-sms-btn');
+        const smsStatus = document.getElementById('sms-status');
+        
+        if (!smsSurveySelect || !sendSmsBtn) return;
+        
+        // Load surveys into SMS dropdown
+        function loadSurveysForSMS() {
+          const surveys = JSON.parse(localStorage.getItem('surveys') || '[]');
+          
+          // Clear existing options except the first one
+          while (smsSurveySelect.options.length > 1) {
+            smsSurveySelect.remove(1);
+          }
+          
+          // Add surveys to select
+          surveys.forEach(survey => {
+            if (!survey.id) return;
+            
+            const option = document.createElement('option');
+            option.value = survey.id;
+            option.textContent = survey.title || `Untitled Survey (${survey.id})`;
+            smsSurveySelect.appendChild(option);
+          });
+        }
+        
+        // Handle SMS form submission
+        sendSmsBtn.addEventListener('click', async function() {
+          const surveyId = smsSurveySelect.value;
+          const phoneNumbers = document.getElementById('phone-numbers').value.trim();
+          const message = document.getElementById('sms-message').value.trim();
+          const senderId = document.getElementById('sms-sender').value.trim();
+          
+          // Validate inputs
+          if (!surveyId) {
+            showSmsStatus('Please select a survey', 'error');
+            return;
+          }
+          
+          if (!phoneNumbers) {
+            showSmsStatus('Please enter at least one phone number', 'error');
+            return;
+          }
+          
+          // Basic phone number validation (simple check for now)
+          const phoneList = phoneNumbers.split('\n').filter(num => num.trim());
+          const invalidNumbers = phoneList.filter(num => !/^\+?[1-9]\d{1,14}$/.test(num.trim()));
+          
+          if (invalidNumbers.length > 0) {
+            showSmsStatus(`Invalid phone number format: ${invalidNumbers[0]}`, 'error');
+            return;
+          }
+          
+          if (!message) {
+            showSmsStatus('Please enter a message', 'error');
+            return;
+          }
+          
+          if (senderId && !/^[a-zA-Z0-9]{1,11}$/.test(senderId)) {
+            showSmsStatus('Sender ID must be 1-11 alphanumeric characters', 'error');
+            return;
+          }
+          
+          try {
+            // Get survey URL
+            const baseUrl = window.location.origin;
+            const surveyUrl = `${baseUrl}/take-survey.html?surveyId=${surveyId}`;
+            
+            // Replace [SURVEY_LINK] placeholder with actual URL
+            const finalMessage = message.replace(/\[SURVEY_LINK\]/g, surveyUrl);
+            
+            // Show loading state
+            const originalBtnText = sendSmsBtn.innerHTML;
+            sendSmsBtn.disabled = true;
+            sendSmsBtn.innerHTML = `
+              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Sending...
+            `;
+            
+            // In a real implementation, you would call your SMS API here
+            // For now, we'll simulate a successful response
+            const response = await sendSMS({
+              to: phoneList,
+              message: finalMessage,
+              senderId: senderId || undefined
+            });
+            
+            // Show success message
+            showSmsStatus(`SMS sent successfully to ${response.sent} recipients`, 'success');
+            
+            // Reset form
+            document.getElementById('phone-numbers').value = '';
+            
+          } catch (error) {
+            console.error('Error sending SMS:', error);
+            showSmsStatus('Failed to send SMS. Please try again.', 'error');
+          } finally {
+            // Reset button state
+            sendSmsBtn.disabled = false;
+            sendSmsBtn.innerHTML = `
+              <i data-lucide="send" class="w-4 h-4"></i>
+              Send SMS
+            `;
+            lucide.createIcons();
+          }
+        });
+        
+        // Helper function to show status messages
+        function showSmsStatus(message, type = 'info') {
+          if (!smsStatus) return;
+          
+          smsStatus.textContent = message;
+          smsStatus.className = 'mt-4 text-sm';
+          
+          switch (type) {
+            case 'error':
+              smsStatus.classList.add('text-red-600');
+              break;
+            case 'success':
+              smsStatus.classList.add('text-green-600');
+              break;
+            default:
+              smsStatus.classList.add('text-blue-600');
+          }
+          
+          smsStatus.classList.remove('hidden');
+        }
+        
+        // Initialize surveys
+        loadSurveysForSMS();
+      }
+      
+      // Simulated SMS sending function
+      // In a real implementation, replace this with your actual SMS API call
+      async function sendSMS({ to, message, senderId }) {
+        console.log('Sending SMS:', { to, message, senderId });
+        
+        // In a real implementation, you would make an API call here
+        // Example:
+        // const response = await fetch('/api/send-sms', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify({ to, message, senderId })
+        // });
+        // return await response.json();
+        
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Return mock response
+        return {
+          success: true,
+          sent: to.length,
+          failed: 0,
+          message: 'SMS sent successfully'
+        };
+      }
+      
+      // Initialize public link functionality
+      function initPublicLinkFunctionality() {
+        console.log('Initializing public link functionality...');
+        
+        // Set up event listeners
+        const publicLinkSurveySelect = document.getElementById('public-link-survey');
+        const copyLinkBtn = document.getElementById('copy-public-link');
+        
+        if (publicLinkSurveySelect) {
+          publicLinkSurveySelect.addEventListener('change', updatePublicLink);
+        } else {
+          console.error('Public link survey select element not found');
+        }
+        
+        if (copyLinkBtn) {
+          copyLinkBtn.addEventListener('click', copyPublicLink);
+        } else {
+          console.error('Copy link button not found');
+        }
+        
+        // Load surveys which will also initialize the public link
+        loadSurveysForPublicLink();
+        
+        console.log('Public link functionality initialized');
+      }
+      
+      // Update the public link based on selected survey
+      function updatePublicLink() {
+        const publicLinkSurveySelect = document.getElementById('public-link-survey');
+        const publicLinkInput = document.getElementById('public-link-url');
+        const publicLinkContainer = document.getElementById('public-link-container');
+        
+        if (!publicLinkSurveySelect || !publicLinkInput || !publicLinkContainer) {
+          console.error('Required elements for public link not found');
+          return;
+        }
+        
+        const surveyId = publicLinkSurveySelect.value;
+        
+        if (!surveyId) {
+          publicLinkContainer.classList.add('hidden');
+          return;
+        }
+        
+        try {
+          // Generate public URL - using take-survey.html instead of survey.html
+          const surveyTitle = publicLinkSurveySelect.options[publicLinkSurveySelect.selectedIndex].text;
+          const baseUrl = window.location.origin + window.location.pathname.replace('distribution.html', '');
+          const publicUrl = `${baseUrl}take-survey.html?id=${encodeURIComponent(surveyId)}&title=${encodeURIComponent(surveyTitle)}`;
+          
+          // Update input field
+          publicLinkInput.value = publicUrl;
+          publicLinkContainer.classList.remove('hidden');
+          
+          console.log('Public link updated:', publicUrl);
+        } catch (error) {
+          console.error('Error updating public link:', error);
+          publicLinkContainer.classList.add('hidden');
+        }
+      }
+      
+      // Copy public link to clipboard
+      function copyPublicLink() {
+        const publicLinkInput = document.getElementById('public-link-url');
+        const copyBtn = document.getElementById('copy-public-link');
+        
+        if (!publicLinkInput || !copyBtn) return;
+        
+        // Select the text field
+        publicLinkInput.select();
+        publicLinkInput.setSelectionRange(0, 99999); // For mobile devices
+        
+        // Copy the text inside the text field
+        navigator.clipboard.writeText(publicLinkInput.value).then(() => {
+          // Change button text to show success
+          const originalText = copyBtn.innerHTML;
+          copyBtn.innerHTML = '<i data-lucide="check" class="h-4 w-4"></i> Copied!';
+          
+          // Reset button text after 2 seconds
+          setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+            lucide.createIcons(); // Re-initialize icons
+          }, 2000);
+        }).catch(err => {
+          console.error('Failed to copy text: ', err);
+          alert('Failed to copy link to clipboard. Please try again.');
+        });
+      }
+      
+      // Initialize all functionality when DOM is loaded
+      // Initialize tab switching between QR code and public link sections
+      function initTabSwitching() {
+        console.log('Initializing tab switching...');
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+        const contentPanels = document.querySelectorAll('.dist-content');
+        
+        if (sidebarLinks.length === 0) {
+          console.error('No sidebar links found');
+          return;
+        }
+        
+        if (contentPanels.length === 0) {
+          console.error('No content panels found');
+          return;
+        }
+        
+        // Function to switch tabs
+        const switchTab = (link) => {
+          const targetId = link.getAttribute('data-target');
+          console.log('Switching to tab:', targetId);
+          
+          // Update active state in sidebar
+          sidebarLinks.forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+          
+          // Update active content panel
+          contentPanels.forEach(panel => {
+            if (panel.id === targetId) {
+              console.log('Showing panel:', panel.id);
+              panel.classList.remove('hidden');
+            } else {
+              panel.classList.add('hidden');
+            }
+          });
+          
+          // Update URL hash
+          const hash = targetId.replace('-content', '');
+          window.history.pushState(null, null, `#${hash}`);
+        };
+        
+        // Add click event listeners to sidebar links
+        sidebarLinks.forEach(link => {
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchTab(link);
+          });
+        });
+        
+        // Check URL hash on page load
+        const hash = window.location.hash.substring(1);
+        if (hash) {
+          console.log('Found hash in URL:', hash);
+          const targetLink = document.querySelector(`.sidebar-link[href="#${hash}"]`);
+          if (targetLink) {
+            console.log('Found matching link for hash, switching tab...');
+            switchTab(targetLink);
+          } else {
+            console.warn('No matching link found for hash:', hash);
+            // Default to first tab if no matching hash is found
+            sidebarLinks[0].click();
+          }
+        } else {
+          console.log('No hash in URL, defaulting to first tab');
+          // Default to first tab if no hash is present
+          sidebarLinks[0].click();
+        }
+      }
+
+      // Initialize everything when DOM is loaded
+    // Initialize everything when the DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOM fully loaded, initializing components...');
+      
+      // Initialize DOM elements
+      sidebarLinks = document.querySelectorAll('#dist-methods .sidebar-link');
+      contentPanels = document.querySelectorAll('#content-panels .dist-content');
+      surveySelect = document.getElementById('survey-select');
+      messageTextarea = document.getElementById('message');
+      sendSurveyBtn = document.getElementById('sendSurveyBtn');
+      
+      console.log('Loading surveys...');
+      // First load the surveys
+      loadSurveys();
+      
+      // Set up survey link update functionality
+      console.log('Setting up survey link update...');
+      setupSurveyLinkUpdate();
+      
+      // Set up send survey button
+      console.log('Setting up send survey button...');
+      setupSendSurveyButton();
+      
+      // Then initialize the QR code functionality (which will load the surveys into the dropdown)
+      console.log('Initializing QR code functionality...');
+      initQRCodeFunctionality();
+      
+      // Initialize SMS functionality
+      console.log('Initializing SMS functionality...');
+      initSMSFunctionality();
+      
+      // Initialize public link functionality (this also loads surveys)
+      console.log('Initializing public link functionality...');
+      initPublicLinkFunctionality();
+      
+      // Initialize tab switching
+      console.log('Initializing tab switching...');
+      initTabSwitching();
+      
+      // Refresh Lucide icons after dynamic content is loaded
+      lucide.createIcons();
+      
+      console.log('All components initialized');
+    });
+  </script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

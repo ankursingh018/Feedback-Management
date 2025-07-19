@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SmartSurvey – Feedback & Survey Management</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <style>
+    @keyframes float {
+      0% { transform: translateY(0px) rotate(-1deg); }
+      50% { transform: translateY(-20px) rotate(1deg); }
+      100% { transform: translateY(0px) rotate(-1deg); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(50px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.8) rotate(-5deg); }
+      to { opacity: 1; transform: scale(1) rotate(0); }
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    body { 
+      font-family: 'Inter', sans-serif; 
+      overflow-x: hidden; 
+      scroll-behavior: smooth;
+    }
+    
+    .animate-float {
+      animation: float 4s ease-in-out infinite;
+      will-change: transform;
+    }
+    
+    .animate-fade-in-up {
+      opacity: 0;
+      animation: fadeInUp 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      will-change: transform, opacity;
+    }
+    
+    .animate-scale-in {
+      opacity: 0;
+      animation: scaleIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+      will-change: transform, opacity;
+    }
+    
+    .animate-pulse {
+      animation: pulse 3s ease-in-out infinite;
+    }
+    .fade-in { 
+      opacity: 0; 
+      transform: translateY(24px); 
+      transition: opacity 0.7s cubic-bezier(.86,0,.07,1), transform 0.7s cubic-bezier(.86,0,.07,1);
+    }
+    .fade-in.visible { 
+      opacity: 1; 
+      transform: none;
+    }
+    
+    .transition-all {
+      transition: all 0.4s ease-in-out;
+    }
+    
+    .hover-scale {
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .hover-scale:hover {
+      transform: scale(1.02);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    @keyframes subtleFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .hover-lift {
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .hover-lift:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .blob {
+      position: absolute; border-radius: 100%; filter: blur(18px); opacity: .23; z-index: 0;
+      animation: float 10s ease-in-out infinite alternate;
+    }
+    @keyframes float {
+      to { transform: translateY(-40px) scale(1.05);}
+    }
+    .gradient-border {
+      border: 2px solid transparent;
+      border-radius: 1.25rem;
+      background-clip: padding-box, border-box;
+      background-origin: border-box;
+      background-image: linear-gradient(white, white), linear-gradient(110deg, #a0e9ff 0%, #b5ead7 70%, #e0c3fc 100%);
+    }
+    .newsletter:focus { outline: 2px solid #38bdf8; }
+  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white min-h-screen text-slate-800 antialiased relative">
+
+  <!-- Animated Blobs Background -->
+  <div class="pointer-events-none select-none absolute inset-0 -z-10">
+    <div class="blob bg-blue-200" style="width:320px;height:320px;left:-120px;top:40px;"></div>
+    <div class="blob bg-green-200" style="width:s220px;height:220px;right:5%;top:140px;animation-delay:1.2s;"></div>
+    <div class="blob bg-purple-200" style="width:180px;height:180px;left:50%;bottom:-90px;animation-delay:2s;"></div>
+  </div>
+
+  <!-- Animated SVG Blobs -->
+  <svg class="absolute top-[-80px] left-[-100px] w-[420px] h-[360px] opacity-40 quiznest-blob-1 pointer-events-none" viewBox="0 0 700 700" fill="none">
+    <defs>
+      <radialGradient id="blob1" cx="0.5" cy="0.5" r="1">
+        <stop offset="0%" stop-color="#a5b4fc" stop-opacity="0.6"/>
+        <stop offset="100%" stop-color="#f3e8ff" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <ellipse cx="350" cy="350" rx="320" ry="170" fill="url(#blob1)"/>
+  </svg>
+  <svg class="absolute bottom-[-120px] right-[-60px] w-[340px] h-[340px] opacity-30 quiznest-blob-2 pointer-events-none" viewBox="0 0 600 600" fill="none">
+    <defs>
+      <radialGradient id="blob2" cx="0.5" cy="0.5" r="1">
+        <stop offset="0%" stop-color="#c7d2fe" stop-opacity="0.5"/>
+        <stop offset="100%" stop-color="#e0e7ff" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <ellipse cx="300" cy="300" rx="270" ry="120" fill="url(#blob2)"/>
+  </svg>
+
+  <!-- Sticky Navigation -->
+  <nav class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 flex items-center justify-between h-16">
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="flex items-center gap-3">
+          <svg width="32" height="32" fill="none" viewBox="0 0 48 48">
+            <rect x="4" y="8" width="40" height="32" rx="8" fill="#38bdf8"/>
+            <rect x="12" y="16" width="24" height="16" rx="4" fill="#34d399"/>
+          </svg>
+          <span class="font-semibold text-lg tracking-tight text-slate-800">SmartSurvey</span>
+        </a>
+      </div>
+      <div class="hidden md:flex gap-8 text-sm font-medium">
+        <div class="relative group">
+          <button id="featuresBtn" type="button" class="text-gray-600 hover:text-blue-600 transition font-medium flex items-center gap-1 focus:outline-none">
+            Features
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+
+          <div id="featuresDropdown" class="absolute left-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-30 flex">
+            <div class="flex flex-col w-full">
+              <a href="survey-creation.html" class="block px-5 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">Survey Creation</a>
+              <a href="distribution.html" class="block px-5 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">Distribution & Sharing</a>
+              <a href="survey-analytics.html" class="block px-5 py-2 text-gray-700 hover:bg-blue-50 rounded-lg transition">Response Collection</a>
+            </div>
+          </div>
+        </div>
+        <a href="index.html#how" class="hover:text-sky-500 transition-colors">How it Works</a>
+        <a href="view-survey.html" class="hover:text-sky-500 transition-colors">View Surveys</a>
+        <a href="survey-analytics.html" class="hover:text-sky-500 transition-colors">Response Collection</a>
+        <a href="index.html#contact" class="hover:text-sky-500 transition-colors">Contact</a>
+      </div>
+      <div class="flex gap-2">
+        <a href="login.html" id="login-button" class="rounded-lg px-4 py-2 font-medium hover:bg-sky-50 text-sky-600 transition-colors">Login</a>
+        <a href="login.html" id="signup-button" class="rounded-lg px-4 py-2 font-medium bg-sky-500 text-white shadow hover:bg-sky-600 transition-colors">Sign Up</a>
+        <button id="logout-button" class="rounded-lg px-4 py-2 font-medium bg-red-500 text-white shadow hover:bg-red-600 transition-colors" style="display:none;">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-8 py-20 flex flex-col md:flex-row gap-12 items-center relative overflow-hidden">
+    <!-- Video Background -->
+    <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full max-w-[440px]" style="z-index: -1;">
+      <div class="relative group">
+        <div class="absolute -inset-2 bg-gradient-to-r from-white/80 to-white/60 rounded-2xl opacity-75 group-hover:opacity-100 blur-md transition-all duration-300"></div>
+        <div class="relative bg-white rounded-xl overflow-hidden shadow-[0_0_30px_rgba(255,255,255,0.5)] transform transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-[0_0_40px_rgba(255,255,255,0.7)] border-4 border-white">
+          <video autoplay loop muted playsinline class="w-full h-auto block">
+            <source src="animations/Instant information (1).mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div class="absolute bottom-4 left-4 right-4 text-white text-sm font-medium">Smart Feedback in Action</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Hero Content - Pushed to right -->
+    <div class="flex-1 fade-in ml-auto" style="animation-delay:.3s; max-width: 50%;">
+      <h1 class="text-4xl sm:text-5xl font-semibold tracking-tight mb-6 text-slate-900 leading-tight">Collect Smart Feedback.<br>Drive Real Results.</h1>
+      <p class="text-xl text-slate-600 mb-8 max-w-lg">Design surveys, get real-time insights, and improve continuously. Everything you need to turn feedback into actionable growth.</p>
+      <div class="flex gap-6 animate-fade-in-up" style="animation-delay: 0.3s;">
+        <a href="survey-creation.html" class="rounded-xl px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold shadow-lg hover:from-blue-600 hover:to-cyan-600 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 animate-pulse">
+          <span class="flex items-center gap-2">
+            <i data-lucide="zap" class="w-5 h-5"></i>
+            Get Started
+          </span>
+        </a>
+        <a href="#demo" class="rounded-xl px-8 py-4 bg-white border-2 border-sky-200 text-sky-600 font-semibold hover:bg-sky-50 hover:border-sky-300 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+          <span class="flex items-center gap-2">
+            <i data-lucide="play-circle" class="w-5 h-5"></i>
+            See Demo
+          </span>
+        </a>
+      </div>
+    </div>
+    <!-- Animated Abstract Wave (background) -->
+    <svg class="absolute bottom-0 left-0 w-full -z-10" height="90" viewBox="0 0 1440 90" fill="none">
+      <path fill="url(#waveGradient)" fill-opacity=".3" d="M0,90 C480,30 960,150 1440,90 L1440,180 L0,180 Z"/>
+      <defs>
+        <linearGradient id="waveGradient" x1="0" y1="0" x2="1440" y2="90" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#a7f3d0"/>
+          <stop offset="1" stop-color="#bae6fd"/>
+        </linearGradient>
+      </defs>
+    </svg>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="max-w-7xl mx-auto px-4 sm:px-8 py-10 md:py-20">
+    <div class="flex flex-col items-center mb-12 fade-in" style="animation-delay:.15s;">
+      <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900 mb-4">All the tools you need</h2>
+      <p class="text-lg text-slate-600">From survey creation to actionable insights, manage feedback seamlessly.</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <!-- Feature 1 -->
+      <div class="p-6 bg-white gradient-border shadow-sm rounded-2xl flex flex-col items-center gap-4 fade-in" style="animation-delay:.25s;">
+        <svg width="48" height="48" fill="none" viewBox="0 0 48 48"><rect x="8" y="12" width="32" height="24" rx="6" fill="#bae6fd"/><rect x="14" y="20" width="20" height="6" rx="3" fill="#38bdf8"/><rect x="14" y="29" width="16" height="4" rx="2" fill="#a7f3d0"/></svg>
+        <h3 class="text-lg font-medium text-slate-900">Survey Creation Tools</h3>
+        <p class="text-slate-600 text-center text-sm">Build beautiful surveys with drag & drop, templates, logic, and branding.</p>
+      </div>
+      <!-- Feature 2 -->
+      <div class="p-6 bg-white gradient-border shadow-sm rounded-2xl flex flex-col items-center gap-4 fade-in" style="animation-delay:.35s;">
+        <svg width="48" height="48" fill="none" viewBox="0 0 48 48"><circle cx="24" cy="24" r="20" fill="#a7f3d0"/><path d="M12 30c6-8 18-8 24 0" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/><circle cx="24" cy="20" r="4" fill="#38bdf8"/></svg>
+        <h3 class="text-lg font-medium text-slate-900">Real-Time Analytics</h3>
+        <p class="text-slate-600 text-center text-sm">Monitor responses instantly with live dashboards and visual reports.</p>
+      </div>
+      <!-- Feature 3 -->
+      <div class="p-6 bg-white gradient-border shadow-sm rounded-2xl flex flex-col items-center gap-4 fade-in" style="animation-delay:.45s;">
+        <svg width="48" height="48" fill="none" viewBox="0 0 48 48"><rect x="6" y="12" width="36" height="8" rx="4" fill="#bbf7d0"/><rect x="6" y="24" width="36" height="8" rx="4" fill="#bae6fd"/><rect x="6" y="36" width="36" height="8" rx="4" fill="#f5d0fe"/></svg>
+        <h3 class="text-lg font-medium text-slate-900">Multi-Channel Distribution</h3>
+        <p class="text-slate-600 text-center text-sm">Share surveys via email, link, QR code, or embed on your site.</p>
+      </div>
+      <!-- Feature 4 -->
+      <div class="p-6 bg-white gradient-border shadow-sm rounded-2xl flex flex-col items-center gap-4 fade-in" style="animation-delay:.55s;">
+        <svg width="48" height="48" fill="none" viewBox="0 0 48 48"><rect x="8" y="8" width="32" height="32" rx="8" fill="#fce7f3"/><path d="M20 32l-4-6 5-6 5 7 4-6" stroke="#a21caf" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="24" cy="16" r="3" fill="#a21caf"/></svg>
+        <h3 class="text-lg font-medium text-slate-900">Actionable Insights</h3>
+        <p class="text-slate-600 text-center text-sm">Turn feedback into decisions with AI-powered recommendations.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section id="how" class="max-w-7xl mx-auto px-4 sm:px-8 py-10 md:py-20">
+    <div class="flex flex-col items-center mb-12 fade-in" style="animation-delay:.15s;">
+      <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900 mb-4">How it Works</h2>
+      <p class="text-lg text-slate-600">Launch your feedback process in 3 simple steps.</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <!-- Step 1 -->
+      <div class="flex flex-col items-center gap-4 fade-in" style="animation-delay:.25s;">
+        <svg width="88" height="88" fill="none" viewBox="0 0 88 88"><rect x="12" y="24" width="64" height="40" rx="12" fill="#bae6fd"/><rect x="26" y="38" width="36" height="8" rx="4" fill="#38bdf8"/><rect x="26" y="52" width="20" height="6" rx="3" fill="#a7f3d0"/></svg>
+        <h4 class="text-lg font-medium text-slate-900 mt-2">1. Create</h4>
+        <p class="text-slate-600 text-center text-sm">Design custom surveys or use our expert templates.</p>
+      </div>
+      <!-- Step 2 -->
+      <div class="flex flex-col items-center gap-4 fade-in" style="animation-delay:.35s;">
+        <svg width="88" height="88" fill="none" viewBox="0 0 88 88"><rect x="18" y="30" width="52" height="28" rx="8" fill="#bbf7d0"/><rect x="31" y="44" width="26" height="6" rx="3" fill="#34d399"/><rect x="31" y="34" width="8" height="6" rx="3" fill="#38bdf8"/></svg>
+        <h4 class="text-lg font-medium text-slate-900 mt-2">2. Distribute</h4>
+        <p class="text-slate-600 text-center text-sm">Share via email, links, QR codes, or embed on your platform.</p>
+      </div>
+      <!-- Step 3 -->
+      <div class="flex flex-col items-center gap-4 fade-in" style="animation-delay:.45s;">
+        <svg width="88" height="88" fill="none" viewBox="0 0 88 88"><rect x="14" y="22" width="60" height="44" rx="12" fill="#fce7f3"/><circle cx="44" cy="44" r="14" fill="#a7f3d0"/><path d="M44 36v8l6 3" stroke="#a21caf" stroke-width="2.5" stroke-linecap="round"/></svg>
+        <h4 class="text-lg font-medium text-slate-900 mt-2">3. Analyze</h4>
+        <p class="text-slate-600 text-center text-sm">Get instant analytics and actionable recommendations.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials/Stats Section -->
+  <section id="testimonials" class="max-w-7xl mx-auto px-4 sm:px-8 py-10 md:py-20">
+    <div class="bg-white rounded-2xl shadow-md px-8 py-10 flex flex-col md:flex-row items-center gap-8 fade-in" style="animation-delay:.2s;">
+      <!-- User Illustration -->
+      <img src="https://images.unsplash.com/photo-1629946832022-c327f74956e0?w=2160&q=80" class="w-20 h-20 rounded-full object-cover shadow-md" alt="Testimonial User" />
+      <!-- Testimonial Content -->
+      <div>
+        <p class="text-lg text-slate-700 font-medium mb-2">&ldquo;SmartSurvey streamlined our feedback process and gave us powerful insights we never had before. Our NPS improved by 18% within three months!&rdquo;</p>
+        <div class="flex items-center gap-2">
+          <span class="font-semibold text-slate-900">Taylor R.</span>
+          <span class="text-slate-500">/ Head of Customer Success, Acme Inc.</span>
+        </div>
+        <div class="mt-4 flex gap-6 text-sm text-slate-500">
+          <div class="flex items-center gap-1"><i data-lucide="users"></i> 12,000+ users</div>
+          <div class="flex items-center gap-1"><i data-lucide="bar-chart-3"></i> 3M+ responses analyzed</div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section id="get-started" class="max-w-7xl mx-auto px-4 sm:px-8 py-16 flex flex-col md:flex-row items-center justify-between bg-gradient-to-r from-sky-100 via-green-50 to-purple-100 rounded-2xl shadow fade-in" style="animation-delay:.15s;">
+    <div>
+      <h3 class="text-2xl font-semibold tracking-tight text-slate-900 mb-2">Ready to collect smarter feedback?</h3>
+      <p class="text-lg text-slate-700">Sign up today and see the difference.</p>
+    </div>
+    <div class="mt-6 md:mt-0 flex gap-4">
+      <a href="#signup" class="rounded-xl px-7 py-3 bg-sky-500 text-white font-medium shadow-lg hover:bg-sky-600 hover:outline hover:outline-2 hover:outline-sky-300 transition-all focus:outline-none">Get Started Free</a>
+      <a href="#demo" class="rounded-xl px-7 py-3 bg-white border border-sky-200 text-sky-600 font-medium hover:bg-sky-50 hover:outline hover:outline-2 hover:outline-sky-200 transition-all">See Demo</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer id="contact" class="max-w-7xl mx-auto px-4 sm:px-8 py-10 mt-16 border-t border-slate-100">
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+      <div class="flex items-center gap-3 mb-4 md:mb-0">
+        <svg width="32" height="32" fill="none" viewBox="0 0 48 48">
+          <rect x="4" y="8" width="40" height="32" rx="8" fill="#38bdf8"/>
+          <rect x="12" y="16" width="24" height="16" rx="4" fill="#34d399"/>
+        </svg>
+        <span class="font-semibold text-base text-slate-800">SmartSurvey</span>
+      </div>
+      <div class="flex gap-8 text-slate-500 text-sm">
+        <a href="#" class="hover:text-sky-500 transition">About</a>
+        <a href="#" class="hover:text-sky-500 transition">Privacy Policy</a>
+        <a href="#" class="hover:text-sky-500 transition">Terms of Service</a>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="#" aria-label="Twitter" class="hover:text-sky-500"><i data-lucide="twitter"></i></a>
+        <a href="#" aria-label="LinkedIn" class="hover:text-sky-500"><i data-lucide="linkedin"></i></a>
+        <a href="#" aria-label="GitHub" class="hover:text-sky-500"><i data-lucide="github"></i></a>
+      </div>
+    </div>
+    <div class="mt-8 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="text-slate-400 text-xs">&copy; 2024 SmartSurvey. All rights reserved.</div>
+      <form class="flex items-center gap-2">
+        <input type="email" class="newsletter rounded-lg border border-slate-200 px-4 py-2 text-sm bg-white placeholder:text-slate-400 focus:border-sky-400 transition" placeholder="Your email for updates" />
+        <button type="submit" class="rounded-lg px-4 py-2 bg-sky-500 text-white text-sm font-medium hover:bg-sky-600 transition">Subscribe</button>
+      </form>
+    </div>
+  </footer>
+
+  <!-- Scroll Fade-in Animation Script -->
+  <script>
+    // Add scroll animation
+    const animateOnScroll = () => {
+      const elements = document.querySelectorAll('.fade-in, .animate-fade-in-up, .animate-scale-in');
+      elements.forEach(element => {
+        const elementTop = element.getBoundingClientRect().top;
+        const elementVisible = 100;
+        if (elementTop < window.innerHeight - elementVisible) {
+          element.classList.add('visible');
+        }
+      });
+    };
+
+    // Initialize animations on load
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initial animation trigger
+      animateOnScroll();
+      
+      // Add scroll event listener
+      window.addEventListener('scroll', animateOnScroll);
+      
+      // Add animation delay to feature cards with staggered effect
+      document.querySelectorAll('.feature-card').forEach((card, index) => {
+        const delay = index * 0.15;
+        card.style.animationDelay = `${delay}s`;
+        card.style.animationDuration = '0.8s';
+        card.classList.add('animate-fade-in-up', 'hover-scale');
+        
+        // Add hover effect
+        card.addEventListener('mouseenter', () => {
+          card.style.transform = 'translateY(-10px)';
+        });
+        card.addEventListener('mouseleave', () => {
+          card.style.transform = '';
+        });
+      });
+      
+      // Add animation delay to step cards with staggered effect
+      document.querySelectorAll('.step-card').forEach((card, index) => {
+        const delay = index * 0.2 + 0.3;
+        card.style.animationDelay = `${delay}s`;
+        card.style.animationDuration = '0.8s';
+        card.classList.add('animate-scale-in', 'hover-lift');
+        
+        // Add number indicator
+        const number = document.createElement('div');
+        number.className = 'absolute -top-4 -left-4 w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 text-white font-bold flex items-center justify-center shadow-md';
+        number.textContent = index + 1;
+        card.prepend(number);
+      });
+      
+      // Add scroll reveal effect to all sections
+      const sections = document.querySelectorAll('section');
+      sections.forEach(section => {
+        section.classList.add('opacity-0', 'transition-opacity', 'duration-700');
+        
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('opacity-100');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.1 });
+        
+        observer.observe(section);
+      });
+      
+      // Add hover effect to all cards
+      document.querySelectorAll('.feature-card, .step-card').forEach(card => {
+        card.classList.add('transition-all', 'hover:shadow-xl', 'hover:-translate-y-1');
+      });
+      lucide.createIcons();
+      function reveal() {
+        const reveals = document.querySelectorAll('.fade-in');
+        let delay = 0;
+        for (let i = 0; i < reveals.length; i++) {
+          const elem = reveals[i];
+          const rect = elem.getBoundingClientRect();
+          if (rect.top < window.innerHeight - 64) {
+            setTimeout(() => elem.classList.add('visible'), delay);
+            delay += 80;
+          }
+        }
+      }
+      window.addEventListener('scroll', reveal);
+      reveal();
+    });
+  </script>
+
+  <!-- User Dashboard (Hidden by default) -->
+  <div class="hidden" id="user-dashboard">
+    <div class="w-full max-w-md p-8 glass mx-auto transition-all duration-300">
+      <!-- Back to Home Link -->
+      <a href="index.html" class="flex items-center mb-6 text-gray-500 hover:text-blue-600 transition font-medium text-sm">
+        <span class="mr-2"><i data-feather="arrow-left"></i></span>
+        Back to Home
+      </a>
+      <!-- Tabs -->
+      <div class="flex mb-8 rounded-full bg-gray-100 overflow-hidden">
+        <a href="#"
+          class="dashboard-tab py-2 px-4 font-medium text-sm transition-all duration-300 rounded-full"
+          class="active"
+          data-tab="surveys"
+          >My Surveys</a
+        >
+        <a href="#"
+          class="dashboard-tab py-2 px-4 font-medium text-sm transition-all duration-300 rounded-full"
+          data-tab="responses"
+          >Responses</a
+        >
+        <a href="#"
+          class="dashboard-tab py-2 px-4 font-medium text-sm transition-all duration-300 rounded-full"
+          data-tab="settings"
+          >Settings</a
+        >
+      </div>
+      <!-- Tab Content -->
+      <div class="tab-content">
+        <!-- My Surveys -->
+        <div class="tab-pane active" data-tab-content="surveys">
+          <h2 class="text-xl font-semibold text-slate-900 mb-4">My Surveys</h2>
+          <div class="bg-white rounded-lg shadow-md p-4 mb-4">
+            <h3 class="font-semibold text-slate-800">Customer Feedback Survey</h3>
+            <p class="text-slate-600 text-sm mb-2">Last edited: 2 days ago</p>
+            <div class="flex gap-2">
+              <a href="#" class="text-sky-500 hover:underline text-sm">View Responses</a>
+              <a href="#" class="text-sky-500 hover:underline text-sm">Edit Survey</a>
+            </div>
+          </div>
+          <!-- Add more surveys as needed -->
+        </div>
+        <!-- Responses -->
+        <div class="tab-pane" data-tab-content="responses">
+          <h2 class="text-xl font-semibold text-slate-900 mb-4">Survey Responses</h2>
+          <p class="text-slate-600 text-sm mb-4">
+            No new responses yet. Check back later!
+          </p>
+          <!-- Add response items here when available -->
+        </div>
+        <!-- Settings -->
+        <div class="tab-pane" data-tab-content="settings">
+          <h2 class="text-xl font-semibold text-slate-900 mb-4">Account Settings</h2>
+          <div class="bg-white rounded-lg shadow-md p-4 mb-4">
+            <h3 class="font-semibold text-slate-800 mb-2">Profile Information</h3>
+            <p class="text-slate-600 text-sm mb-2">Name: John Doe</p>
+            <p class="text-slate-600 text-sm mb-4">Email: john.doe@example.com</p>
+            <a href="#" class="text-sky-500 hover:underline text-sm">Edit Profile</a>
+          </div>
+          <div class="bg-white rounded-lg shadow-md p-4 mb-4">
+            <h3 class="font-semibold text-slate-800 mb-2">Security</h3>
+            <p class="text-slate-600 text-sm mb-2">Last password change: 10 days ago</p>
+            <a href="#" class="text-sky-500 hover:underline text-sm">Change Password</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Optional: For click-to-open on mobile
+    const btn = document.getElementById('featuresBtn');
+    const dropdown = document.getElementById('featuresDropdown');
+    const surveyBtn = document.getElementById('surveyCreationBtn');
+    const submenu = document.getElementById('surveyCreationSubmenu');
+
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      dropdown.classList.toggle('opacity-0');
+      dropdown.classList.toggle('pointer-events-none');
+    });
+
+    // Show submenu on click/touch
+    surveyBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      submenu.classList.toggle('opacity-0');
+      submenu.classList.toggle('pointer-events-none');
+    });
+
+    // Close dropdown and submenu when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.classList.add('opacity-0', 'pointer-events-none');
+        submenu.classList.add('opacity-0', 'pointer-events-none');
+      }
+      if (!surveyBtn.contains(e.target) && !submenu.contains(e.target)) {
+        submenu.classList.add('opacity-0', 'pointer-events-none');
+      }
+    });
+  </script>
+  <script src="js/auth.js"></script>
+</body>
+</html>
