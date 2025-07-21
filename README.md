@@ -35,6 +35,7 @@ The system supports two roles:
   - Date / Time
 - View and manage all created surveys
 - Distribute surveys to users (via shareable links or dashboard)
+- Chatbot Assistance – An AI chatbot is integrated into the survey creation page to help guide users in creating effective questions.
 - View collected responses
 - Analyze results via charts and tables
 
