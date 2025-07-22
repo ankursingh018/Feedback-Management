@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Cohere API will be called directly via fetch -->
   <style>
     body { font-family: 'Inter', sans-serif; }
     .blob {
@@ -155,6 +156,191 @@
       height: 1.1rem;
       cursor: pointer;
     }
+    
+    /* AI Chatbot Styles */
+    .ai-chatbot {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 50;
+    }
+    
+    .ai-chatbot-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.3), 0 8px 10px -6px rgba(99, 102, 241, 0.2);
+      transition: all 0.3s ease;
+      border: none;
+      outline: none;
+    }
+    
+    .ai-chatbot-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.3), 0 10px 10px -6px rgba(99, 102, 241, 0.2);
+    }
+    
+    .ai-chatbot-panel {
+      position: fixed;
+      bottom: 5.5rem;
+      right: 2rem;
+      width: 380px;
+      max-width: 90vw;
+      height: 600px;
+      max-height: 80vh;
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform: translateY(20px);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 40;
+    }
+    
+    .ai-chatbot-panel.active {
+      transform: translateY(0);
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .ai-chatbot-header {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .ai-chatbot-header h3 {
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .ai-chatbot-close {
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 0.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .ai-chatbot-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .ai-chatbot-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .message {
+      max-width: 80%;
+      padding: 0.75rem 1rem;
+      border-radius: 1rem;
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+    
+    .message.user {
+      align-self: flex-end;
+      background: #6366f1;
+      color: white;
+      border-bottom-right-radius: 0.25rem;
+    }
+    
+    .message.assistant {
+      align-self: flex-start;
+      background: #f3f4f6;
+      color: #1f2937;
+      border-bottom-left-radius: 0.25rem;
+    }
+    
+    .ai-chatbot-input {
+      display: flex;
+      padding: 1rem;
+      border-top: 1px solid #e5e7eb;
+      background: #f9fafb;
+    }
+    
+    .ai-chatbot-input input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem 0 0 0.5rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    
+    .ai-chatbot-input input:focus {
+      border-color: #6366f1;
+    }
+    
+    .ai-chatbot-input button {
+      background: #6366f1;
+      color: white;
+      border: none;
+      padding: 0 1.25rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    
+    .ai-chatbot-input button:hover {
+      background: #4f46e5;
+    }
+    
+    .typing-indicator {
+      display: flex;
+      gap: 0.25rem;
+      padding: 0.5rem 1rem;
+      background: #f3f4f6;
+      border-radius: 1rem;
+      width: fit-content;
+      margin-bottom: 0.5rem;
+    }
+    
+    .typing-indicator span {
+      width: 8px;
+      height: 8px;
+      background: #9ca3af;
+      border-radius: 50%;
+      display: inline-block;
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
+    
+    .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+    .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+    
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
+    }
     .question-card-pro table.likert-table input.option-input {
       background: transparent;
       border: none;
@@ -261,8 +447,44 @@
           <li class="flex items-center gap-2 text-slate-600" style="cursor:pointer"><i data-lucide="star"></i> Rating Scale</li>
           <li class="flex items-center gap-2 text-slate-600" style="cursor:pointer"><i data-lucide="bar-chart-2"></i> Likert Scale</li>
           <li class="flex items-center gap-2 text-slate-600" style="cursor:pointer"><i data-lucide="calendar"></i> Date Picker</li>
-          <!-- Removed Image Choice button -->
         </ul>
+        
+        <!-- Predefined Question Sets -->
+        <div class="mb-6">
+          <div class="font-semibold text-slate-700 mb-2">Predefined Question Sets</div>
+          <div class="space-y-2">
+            <div class="predefined-set group flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors border border-transparent hover:border-blue-200" data-set="customer-feedback">
+              <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 group-hover:bg-blue-200 transition-colors">
+                <i data-lucide="users" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <div class="font-medium text-sm text-slate-800">Customer Feedback</div>
+                <div class="text-xs text-slate-500">5 essential questions</div>
+              </div>
+            </div>
+            
+            <div class="predefined-set group flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors border border-transparent hover:border-blue-200" data-set="employee-feedback">
+              <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600 group-hover:bg-purple-200 transition-colors">
+                <i data-lucide="briefcase" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <div class="font-medium text-sm text-slate-800">Employee Feedback</div>
+                <div class="text-xs text-slate-500">6 key questions</div>
+              </div>
+            </div>
+            
+            <div class="predefined-set group flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors border border-transparent hover:border-blue-200" data-set="product-review">
+              <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center text-green-600 group-hover:bg-green-200 transition-colors">
+                <i data-lucide="package" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <div class="font-medium text-sm text-slate-800">Product Review</div>
+                <div class="text-xs text-slate-500">7 detailed questions</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
         <div>
           <div class="font-semibold text-slate-700 mb-2">Survey Templates</div>
           <div class="bg-blue-50 rounded-xl p-3 space-y-2 text-sm">
@@ -311,6 +533,292 @@
   </div>
   <script>
     lucide.createIcons();
+
+    // Survey Templates Data
+    const SURVEY_TEMPLATES = [
+      {
+        id: 'customer-feedback',
+        name: 'Customer Feedback',
+        description: 'Collect feedback from your customers about their experience',
+        icon: 'users',
+        questions: [
+          {
+            type: 'rating',
+            text: 'How would you rate your overall experience with our product/service?',
+            required: true,
+            options: ['1 - Poor', '2', '3 - Average', '4', '5 - Excellent']
+          },
+          {
+            type: 'text',
+            text: 'What did you like most about our product/service?',
+            required: false
+          },
+          {
+            type: 'text',
+            text: 'What could we improve?',
+            required: false
+          },
+          {
+            type: 'mcq',
+            text: 'How likely are you to recommend us to others?',
+            required: true,
+            options: ['Very Likely', 'Likely', 'Neutral', 'Unlikely', 'Very Unlikely']
+          }
+        ]
+      },
+      {
+        id: 'employee-engagement',
+        name: 'Employee Engagement',
+        description: 'Measure employee satisfaction and engagement',
+        icon: 'users-2',
+        questions: [
+          {
+            type: 'rating',
+            text: 'How satisfied are you with your current role and responsibilities?',
+            required: true,
+            options: ['1 - Very Dissatisfied', '2', '3 - Neutral', '4', '5 - Very Satisfied']
+          },
+          {
+            type: 'text',
+            text: 'What do you enjoy most about working here?',
+            required: false
+          },
+          {
+            type: 'text',
+            text: 'What could we improve about the work environment?',
+            required: false
+          },
+          {
+            type: 'mcq',
+            text: 'Do you feel your work is valued and recognized?',
+            required: true,
+            options: ['Always', 'Often', 'Sometimes', 'Rarely', 'Never']
+          }
+        ]
+      },
+      {
+        id: 'event-feedback',
+        name: 'Event Feedback',
+        description: 'Gather feedback after an event or conference',
+        icon: 'calendar',
+        questions: [
+          {
+            type: 'rating',
+            text: 'How would you rate the overall event?',
+            required: true,
+            options: ['1 - Poor', '2', '3 - Average', '4', '5 - Excellent']
+          },
+          {
+            type: 'text',
+            text: 'What was your favorite part of the event?',
+            required: false
+          },
+          {
+            type: 'text',
+            text: 'What could be improved for future events?',
+            required: false
+          },
+          {
+            type: 'mcq',
+            text: 'Would you attend this event again?',
+            required: true,
+            options: ['Definitely', 'Probably', 'Not Sure', 'Probably Not', 'Definitely Not']
+          }
+        ]
+      }
+    ];
+
+    // Function to load a template
+    function loadTemplate(template) {
+      // Update survey title with template name
+      const surveyTitleInput = document.getElementById('surveyTitle');
+      if (surveyTitleInput) {
+        surveyTitleInput.value = `${template.name} Survey`;
+      }
+      
+      // Clear existing questions
+      questions = [];
+      
+      // Add questions from template
+      template.questions.forEach(questionData => {
+        const newQuestion = {
+          type: questionData.type,
+          text: questionData.text,
+          required: questionData.required || false,
+          options: questionData.options ? [...questionData.options] : []
+        };
+        
+        // Add the question to the questions array
+        questions.push(newQuestion);
+      });
+      
+      // Set the first question as active
+      activeQuestionIndex = questions.length > 0 ? 0 : -1;
+      
+      // Re-render questions
+      renderQuestions();
+      
+      // Show success notification
+      showNotification({
+        title: 'Template Loaded',
+        message: `${template.name} template has been loaded successfully!`,
+        type: 'success',
+        duration: 3000
+      });
+    }
+
+    // Function to show notification
+    function showNotification({ title = '', message = '', type = 'info', duration = 3000 }) {
+      // Create notification container if it doesn't exist
+      let container = document.getElementById('notification-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'notification-container';
+        container.className = 'fixed top-4 right-4 z-50 space-y-2 w-80';
+        document.body.appendChild(container);
+      }
+
+      // Create notification element
+      const notification = document.createElement('div');
+      const typeClasses = {
+        success: 'bg-green-100 border-green-400 text-green-700',
+        error: 'bg-red-100 border-red-400 text-red-700',
+        warning: 'bg-yellow-100 border-yellow-400 text-yellow-700',
+        info: 'bg-blue-100 border-blue-400 text-blue-700'
+      };
+
+      notification.className = `border-l-4 p-4 rounded shadow-lg ${typeClasses[type] || typeClasses.info} animate-slide-in`;
+      
+      // Add notification content
+      notification.innerHTML = `
+        <div class="flex justify-between items-start">
+          <div>
+            ${title ? `<h4 class="font-bold">${title}</h4>` : ''}
+            <p class="text-sm">${message}</p>
+          </div>
+          <button class="close-notification ml-2">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      `;
+
+      // Add close functionality
+      const closeBtn = notification.querySelector('.close-notification');
+      const closeNotification = () => {
+        notification.classList.remove('animate-slide-in');
+        notification.classList.add('animate-slide-out');
+        setTimeout(() => notification.remove(), 300);
+      };
+
+      closeBtn.addEventListener('click', closeNotification);
+
+      // Auto-remove after duration
+      let timeoutId = setTimeout(closeNotification, duration);
+
+      // Pause auto-remove on hover
+      notification.addEventListener('mouseenter', () => clearTimeout(timeoutId));
+      notification.addEventListener('mouseleave', () => {
+        timeoutId = setTimeout(closeNotification, duration);
+      });
+
+      // Add to container
+      container.appendChild(notification);
+      
+      // Initialize Lucide icons
+      lucide.createIcons();
+      
+      return notification;
+    }
+
+    // Add animation styles
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+      }
+      .animate-slide-in {
+        animation: slideIn 0.3s ease-out forwards;
+      }
+      .animate-slide-out {
+        animation: slideOut 0.3s ease-out forwards;
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Function to show template selection modal
+    function showTemplatesModal() {
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+      
+      const modalContent = document.createElement('div');
+      modalContent.className = 'bg-white rounded-xl p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto';
+      
+      modalContent.innerHTML = `
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-semibold text-slate-800">Choose a Template</h3>
+          <button class="close-btn p-2 hover:bg-gray-100 rounded-full">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          ${SURVEY_TEMPLATES.map(template => `
+            <div class="border rounded-lg p-4 hover:border-blue-400 transition-colors cursor-pointer template-card" data-template-id="${template.id}">
+              <div class="flex items-center gap-3 mb-2">
+                <div class="bg-blue-50 p-2 rounded-lg">
+                  <i data-lucide="${template.icon}" class="w-5 h-5 text-blue-600"></i>
+                </div>
+                <h4 class="font-medium text-slate-800">${template.name}</h4>
+              </div>
+              <p class="text-sm text-slate-500 mb-3">${template.description}</p>
+              <div class="text-xs text-slate-400">${template.questions.length} questions</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      
+      // Close modal when clicking outside or on close button
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal || e.target.closest('.close-btn')) {
+          modal.remove();
+        }
+      });
+      
+      // Handle template selection
+      modalContent.querySelectorAll('.template-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const templateId = card.dataset.templateId;
+          const template = SURVEY_TEMPLATES.find(t => t.id === templateId);
+          if (template) {
+            loadTemplate(template);
+            modal.remove();
+          }
+        });
+      });
+      
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+      lucide.createIcons();
+    }
+
+    // Initialize template button
+    document.addEventListener('DOMContentLoaded', () => {
+      const templateBtn = document.createElement('button');
+      templateBtn.className = 'survey-btn-pro px-4 py-2 rounded-lg bg-white border border-gray-200 text-gray-700 font-medium shadow hover:bg-gray-50 transition flex items-center gap-2';
+      templateBtn.innerHTML = '<i data-lucide="layout-template"></i> Templates';
+      templateBtn.addEventListener('click', showTemplatesModal);
+      
+      // Add template button next to the preview button
+      const previewBtn = document.getElementById('previewBtn');
+      previewBtn.parentNode.insertBefore(templateBtn, previewBtn.nextSibling);
+      
+      // Initialize Lucide icons
+      lucide.createIcons();
+    });
 
     // Dropdown logic for Features
     const btn = document.getElementById('featuresBtn');
@@ -782,5 +1290,278 @@
     });
   </script>
   <script src="js/auth.js"></script>
+  <!-- AI Chatbot Button -->
+  <div class="ai-chatbot">
+    <button id="aiChatbotBtn" class="ai-chatbot-btn" aria-label="AI Assistant">
+      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 8V16"/>
+        <path d="M8 12H16"/>
+        <rect width="18" height="18" x="3" y="3" rx="2"/>
+      </svg>
+    </button>
+    
+    <div id="aiChatbotPanel" class="ai-chatbot-panel">
+      <div class="ai-chatbot-header">
+        <h3><i data-lucide="bot"></i> AI Survey Assistant</h3>
+        <button id="aiChatbotClose" class="ai-chatbot-close" aria-label="Close">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      
+      <div id="aiChatbotMessages" class="ai-chatbot-messages">
+        <div class="message assistant">
+          Hello! I'm your AI Survey Assistant. I can help you create better surveys, suggest questions, and provide feedback on your survey structure. How can I assist you today?
+        </div>
+      </div>
+      
+      <div class="ai-chatbot-input">
+        <input type="text" id="aiChatbotInput" placeholder="Ask me anything about creating surveys..." />
+        <button id="aiChatbotSend">
+          <i data-lucide="send"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // AI Chatbot functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const chatbotBtn = document.getElementById('aiChatbotBtn');
+      const chatbotPanel = document.getElementById('aiChatbotPanel');
+      const chatbotClose = document.getElementById('aiChatbotClose');
+      const chatbotMessages = document.getElementById('aiChatbotMessages');
+      const chatbotInput = document.getElementById('aiChatbotInput');
+      const chatbotSend = document.getElementById('aiChatbotSend');
+      
+      // Toggle chatbot panel
+      chatbotBtn.addEventListener('click', function() {
+        chatbotPanel.classList.toggle('active');
+        if (chatbotPanel.classList.contains('active')) {
+          chatbotInput.focus();
+        }
+      });
+      
+      // Close chatbot panel
+      chatbotClose.addEventListener('click', function() {
+        chatbotPanel.classList.remove('active');
+      });
+      
+      // Send message on button click
+      chatbotSend.addEventListener('click', sendMessage);
+      
+      // Send message on Enter key
+      chatbotInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          sendMessage();
+        }
+      });
+      
+      // Function to add a message to the chat
+      function addMessage(content, isUser = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+        messageDiv.textContent = content;
+        chatbotMessages.appendChild(messageDiv);
+        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+      }
+      
+      // Function to show typing indicator
+      function showTypingIndicator() {
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'typing-indicator';
+        typingDiv.innerHTML = '<span></span><span></span><span></span>';
+        typingDiv.id = 'typingIndicator';
+        chatbotMessages.appendChild(typingDiv);
+        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+      }
+      
+      // Function to hide typing indicator
+      function hideTypingIndicator() {
+        const typingIndicator = document.getElementById('typingIndicator');
+        if (typingIndicator) {
+          typingIndicator.remove();
+        }
+      }
+      
+      // Function to wait for GoogleGenerativeAI to be available
+      function waitForGemini() {
+        return new Promise((resolve) => {
+          if (window.GoogleGenerativeAI) {
+            resolve();
+          } else {
+            const checkGemini = setInterval(() => {
+              if (window.GoogleGenerativeAI) {
+                clearInterval(checkGemini);
+                resolve();
+              }
+            }, 100);
+          }
+        });
+      }
+
+      // Cohere API configuration
+      const COHERE_API_KEY = 'Tqvqv3zd5H3K8MaeMlqHeeLUjjhIPunt2384akbx';
+      const COHERE_API_URL = 'https://api.cohere.ai/v1/chat';
+
+      // Function to handle API errors
+      function handleAPIError(error) {
+        console.error('API Error:', error);
+        
+        if (error.status === 401) {
+          return "The API key is invalid. Please check your Cohere API key.";
+        }
+        
+        if (error.status === 429) {
+          return "I'm currently getting too many requests. Please wait a minute and try again. If this continues, you may need to check your API quota.";
+        }
+        
+        return "I'm having trouble connecting to the AI service right now. " + 
+               (error.message ? `Error: ${error.message}` : 'Please try again in a moment.');
+      }
+      
+      // Function to send message to Cohere API
+      async function sendToAI(message) {
+        try {
+          // Get conversation history
+          const messages = Array.from(document.querySelectorAll('.message'));
+          let chatHistory = [];
+          let systemMessage = 'You are a helpful assistant that helps create and improve survey questions. Provide clear, concise, and actionable feedback.';
+          
+          // Add previous messages to chat history
+          messages.forEach(msg => {
+            const isUser = msg.classList.contains('user');
+            const role = isUser ? 'USER' : 'CHATBOT';
+            const content = msg.textContent.trim();
+            
+            if (content) {
+              chatHistory.push({
+                role: role,
+                message: content
+              });
+            }
+          });
+          
+          // Prepare the request body
+          const requestBody = {
+            model: 'command-r-plus',
+            message: message,
+            chat_history: chatHistory,
+            temperature: 0.7,
+            max_tokens: 1000,
+            preamble: systemMessage
+          };
+          
+          // Call Cohere API directly
+          const response = await fetch(COHERE_API_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${COHERE_API_KEY}`,
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+          });
+          
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to get response from Cohere API');
+          }
+          
+          const data = await response.json();
+          return data.text;
+          
+        } catch (error) {
+          console.error('Error calling Cohere API:', error);
+          return handleAPIError(error);
+        }
+      }
+      
+      // Function to handle sending a message
+      async function sendMessage() {
+        const message = chatbotInput.value.trim();
+        if (!message) return;
+        
+        // Add user message to chat
+        addMessage(message, true);
+        chatbotInput.value = '';
+        
+        // Show typing indicator
+        showTypingIndicator();
+        
+        try {
+          // Get response from AI
+          const response = await sendToAI(message);
+          
+          // Remove typing indicator and add response
+          hideTypingIndicator();
+          addMessage(response, false);
+        } catch (error) {
+          console.error('Error:', error);
+          hideTypingIndicator();
+          addMessage("I'm sorry, I encountered an error. Please try again.", false);
+        }
+      }
+      
+      // Initialize Lucide icons for the chatbot
+      lucide.createIcons();
+    });
+    
+    // Add this to your existing script section that handles survey creation
+    document.addEventListener('DOMContentLoaded', function() {
+      // ... existing code ...
+      
+      // Add AI suggestion button to question cards
+      function addAISuggestionButton(questionCard) {
+        const aiButton = document.createElement('button');
+        aiButton.className = 'flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 transition-colors';
+        aiButton.innerHTML = '<i data-lucide="sparkles" class="w-3.5 h-3.5"></i> AI Suggestions';
+        
+        aiButton.addEventListener('click', async function() {
+          const questionText = questionCard.querySelector('input[placeholder="Enter your question"]').value;
+          
+          if (!questionText) {
+            alert('Please enter a question first to get AI suggestions.');
+            return;
+          }
+          
+          // Show the chatbot panel if not already open
+          const chatbotPanel = document.getElementById('aiChatbotPanel');
+          if (!chatbotPanel.classList.contains('active')) {
+            chatbotPanel.classList.add('active');
+          }
+          
+          // Focus the input and set the question
+          const chatbotInput = document.getElementById('aiChatbotInput');
+          chatbotInput.value = `Can you suggest improvements for this survey question: "${questionText}"`;
+          chatbotInput.focus();
+          
+          // Trigger the send message
+          document.getElementById('aiChatbotSend').click();
+        });
+        
+        // Add the button to the question card actions
+        const questionActions = questionCard.querySelector('.question-actions');
+        if (questionActions) {
+          questionActions.appendChild(aiButton);
+        }
+      }
+      
+      // Update the addQuestion function to include the AI suggestion button
+      const originalAddQuestion = window.addQuestion || function() {};
+      window.addQuestion = function(type) {
+        const questionId = originalAddQuestion(type);
+        const questionCard = document.querySelector(`[data-question-id="${questionId}"]`);
+        if (questionCard) {
+          addAISuggestionButton(questionCard);
+        }
+        return questionId;
+      };
+      
+      // Add AI button to existing questions on page load
+      document.querySelectorAll('.question-card-pro').forEach(questionCard => {
+        addAISuggestionButton(questionCard);
+      });
+    });
+  </script>
 </body>
 </html>
